@@ -25,6 +25,7 @@ on:
 
 jobs:
   compile:
+    runs-on: ubuntu-latest
     steps:
 
       - name: Check out SPM

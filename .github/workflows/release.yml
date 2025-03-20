@@ -11,6 +11,7 @@ jobs:
 
   compile-and-publish:
 
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: False
       matrix:
