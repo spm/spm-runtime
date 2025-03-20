@@ -1,20 +1,24 @@
 [project]
 name = "spm-runtime"
-maintainers = [{name = "Yael Balbastre", email = "y.balbastre@ucl.ac.uk"}]
 description = "Compiled SPM package that can be called from Python"
 readme = "README.md"
-license = {file = "LICENSE"}
-classifiers = [
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
-    "Operating System :: OS Independent",  # If >= R2020a
-]
-requires-python = "{python_versions}"
-dependencies = ["matlab-runtime"]
-version = "0.0.0"
+classifiers = [ "Intended Audience :: Science/Research", "License :: OSI Approved :: GNU General Public License v2 (GPLv2)", "Operating System :: OS Independent", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12",]
+requires-python = ">=3.9,<3.13"
+dependencies = [ "matlab-runtime",]
+version = "25.01.01"
+[[project.maintainers]]
+name = "Yael Balbastre"
+email = "y.balbastre@ucl.ac.uk"
+
+[build-system]
+requires = [ "setuptools >= 61.0", "wheel",]
+build-backend = "setuptools.build_meta"
+
+[project.license]
+file = "LICENSE"
 
 [project.optional-dependencies]
-test = ["pytest"]
+test = [ "pytest",]
 
 [project.urls]
 Homepage = "https://github.com/balbasty/spm-runtime"
@@ -23,12 +27,8 @@ Issues = "https://github.com/balbasty/spm-runtime/issues"
 [project.scripts]
 spm = "spm_runtime.cli:main"
 
-[build-system]
-requires = [
-  "setuptools >= 61.0",
-  "wheel",
-]
-build-backend = "setuptools.build_meta"
-
 [tool.setuptools]
-packages = ["spm_runtime"]
+packages = [ "spm_runtime",]
+
+[tool.setuptools.package-data]
+spm_runtime = [ "spm_runtime/_spm/_spm.ctf",]

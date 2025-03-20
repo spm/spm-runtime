@@ -44,7 +44,9 @@ jobs:
       - name: Guess tag name
         if: ${{ inputs.spm-version }} == ""
         run: |
+          cd .compile/external/spm
           echo "tag=$( git describe --tags $(git rev-list --tags --max-count=1) ).dev" >> "$GITHUB_ENV"
+          cd ../../..
 
       - name: Check out MPython
         uses: actions/checkout@v4

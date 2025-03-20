@@ -20,7 +20,7 @@ if nargin < 1, [outdir, ~, ~] = fileparts(mfilename('fullpath')); end
 
 cd(outdir);
 
-if ~exists('external', 'dir'), mkdir('external'); end
+if ~exist('external', 'dir'), mkdir('external'); end
 cd('external')
 if ~exist('spm', 'dir')
     system('git clone --depth=1 https://github.com/spm/spm.git');
@@ -31,9 +31,9 @@ end
 cd('..')
 
 if exist('cleaned', 'dir')
-    rmdir('cleaned', '-s');
+    rmdir('cleaned', 's');
 end
-mkdir('bucleanedild')
+mkdir('cleaned')
 
 spmpath = fullfile(outdir, 'cleaned', 'spm');
 copyfile(fullfile('external', 'spm'), spmpath, 'f');
@@ -58,10 +58,9 @@ ignored = {...
     'toolbox/DEM/ADEM_saccades.mat',...
 };
 for d = ignored
-    try
+    if exist(fullfile(spmpath, d{1}), 'dir')
         rmdir(fullfile(spmpath, d{1}), 's');
-    end
-    try
+    elseif exist(fullfile(spmpath, d{1}), 'file')
         delete(fullfile(spmpath, d{1}));
     end
 end

@@ -1,0 +1,127 @@
+from matlab_runtime.utils import guess_matlab_release
+
+import argparse
+import tempfile
+import subprocess
+import shutil
+import os
+from datetime import datetime
+
+
+def compile(spm_version=None, matlab_release="R2024b", odir="."):
+
+    cwd = os.path.abspath(os.curdir)
+    odir = os.path.abspath(odir)
+
+    current_release = guess_matlab_release(shutil.which("matlab"))
+    if current_release != matlab_release:
+        raise RuntimeError(
+            "matlab on path is not", matlab_release,
+            "but", current_release
+        )
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+
+        os.makedirs(os.path.join(tmpdir, "external"), exist_ok=True)
+        os.chdir(os.path.join(tmpdir, "external"))
+
+        # Checkout SPM
+        shutil.rmtree("spm", ignore_errors=True)
+        subprocess.run([
+            "git", "clone", "https://github.com/spm/spm",
+        ])
+        os.chdir("spm")
+
+        if spm_version:
+            # Checkout version
+            subprocess.run(["git", "fetch", "origin", spm_version])
+            subprocess.run(["git", "reset", "--hard", "FETCH_HEAD"])
+            spm_runtime_version = spm_version
+        else:
+            # Guess version
+            # -> We use the most recent tag and add ".dev"
+            sha = subprocess.run([
+                "git", "rev-list", "--tags", "--max-count=1"
+            ], capture_output=True).stdout.decode().strip()
+            spm_version = subprocess.run([
+                "git", "describe", "--tags", sha
+            ], capture_output=True).stdout.decode().strip()
+            spm_runtime_version = spm_version + ".dev"
+            print("Guessed version:", spm_version)
+
+        # Save hash
+        sha = subprocess.run([
+            "git", "rev-parse", "HEAD"
+        ], capture_output=True).stdout.decode().strip()
+
+        # Guess date
+        date = subprocess.run([
+            "git", "show", "--no-patch", "--format=%cs"
+        ], capture_output=True).stdout.decode().strip()
+        date = datetime.strptime("2019-03-02", "%Y-%m-%d").strftime("%d-%b-%Y")
+
+        # Set version in content
+        SPM_RELEASE = spm_version[:2]
+        version_line = f"% Version {spm_version} (SPM{SPM_RELEASE}) {date}"
+        with open("tmp", "wb") as f:
+            f.write(
+                subprocess.run([
+                    "sed", f"2s/.*/{version_line}/", "Contents.m",
+                ], capture_output=True).stdout
+            )
+        shutil.move("tmp", "Contents.m")
+
+        os.chdir("..")
+
+        # Checkout MPython
+        shutil.rmtree("mpython", ignore_errors=True)
+        subprocess.run([
+            "git", "clone", "--depth", "1",
+            "https://github.com/MPython-Package-Factory/mpython",
+        ])
+
+        # Checkout SPM-Runtime
+        shutil.rmtree("spm-runtime", ignore_errors=True)
+        # subprocess.run([
+        #     "git", "clone", "--depth", "1",
+        #     "https://github.com/balbasty/spm-runtime",
+        # ])
+        # -> Actually, we are spm-runtime, so simply copy the script.
+        os.makedirs("spm-runtime/scripts", exist_ok=True)
+        shutil.copyfile(
+            os.path.join(os.path.dirname(__file__), "spm_make_python.m"),
+            "spm-runtime/scripts/spm_make_python.m"
+        )
+
+        # Compile
+        compile_dir = os.path.abspath('..')
+        subprocess.run([
+            "matlab", "-batch",
+            f"addpath('spm-runtime/scripts');"
+            f"spm_make_python('{compile_dir}')"
+        ])
+
+        # Copy CTF
+        shutil.move(
+            os.path.join(compile_dir, "spm/_spm/_spm.ctf"),
+            os.path.join(odir, f"spm_{matlab_release}_{spm_runtime_version}.ctf")
+        )
+
+    os.chdir(cwd)
+    return (
+        spm_runtime_version,
+        os.path.join(odir, f"spm_{matlab_release}_{spm_runtime_version}.ctf")
+    )
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-v", "--spm-version", default=None, help="SPM version")
+    parser.add_argument("-r", "--matlab-runtime", default="R2024b", help="Matlab release")
+    parser.add_argument("-o", "--output", default=".", help="Output directory")
+    p = parser.parse_args()
+    compile(p.spm_version, p.matlab_runtime, p.output)
+
+
+if __name__ == "__main__":
+    main()

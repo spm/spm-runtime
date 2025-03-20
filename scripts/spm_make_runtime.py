@@ -7,6 +7,8 @@ def _make_parser():
     p = argparse.ArgumentParser()
     p.add_argument("--matlab-version", required=True)
     p.add_argument("--spm-version", required=True)
+    p.add_argument("--spm-sha")
+    p.add_argument("--main-project", action='store_true')
     return p
 
 
@@ -42,27 +44,39 @@ def _main():
     p = _make_parser().parse_args()
     R = p.matlab_version
     V = p.spm_version
+    S = p.spm_sha
 
     python_versions = list(SUPPORTED_PYTHON_VERSIONS[R])
 
     # Fix pyproject.toml
     pyproject = toml.load("pyproject.toml")
     project = pyproject.get("project")
-    project['name'] = f"spm-runtime-{R}"
+    if p.main_project:
+        project['name'] = "spm-runtime"
+    else:
+        project['name'] = f"spm-runtime-{R}"
     project['version'] = V
     project['requires-python'] = _requires_python(python_versions)
+    project['classifiers'] = [
+        classifier for classifier in project['classifiers']
+        if not classifier.startswith("Programming Language :: Python")
+    ]
     project['classifiers'] += [
         "Programming Language :: Python :: " + python_version
         for python_version in python_versions
     ]
-    toml.dump(pyproject, "pyproject.toml")
+    with open("pyproject.toml", "w") as f:
+        toml.dump(pyproject, f)
 
     # Fix _version.py
     with open("spm_runtime/_version.py", "wt") as f:
-        f.writelines([
-            "__version__ = " + V,
-            "__matlab_release__ = " + R,
-        ])
+        lines = [
+            f'__version__ = "{V}"',
+            f'__matlab_release__ = "{R}"',
+        ]
+        if S:
+            lines += [f'__spm_sha__ = "{S}"']
+        f.write("\n".join(lines) + "\n")
 
 
 if __name__ == "__main__":
