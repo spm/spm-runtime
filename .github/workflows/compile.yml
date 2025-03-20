@@ -1,6 +1,15 @@
 name: Compile CTF
 on:
   workflow_dispatch:
+    inputs:
+      spm-version:
+        description: 'SPM Commit / Branch / Tag / SHA to checkout'
+        required: false
+        default: ''
+      matlab-version:
+        description: 'MATLAB release'
+        required: false
+        default: 'R2024b'
   workflow_call:
     inputs:
       spm-version:
