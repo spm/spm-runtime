@@ -71,13 +71,13 @@ jobs:
         shell: bash
         # Replace the second line of Contents.m with the version line
         run: |
-          cd('.compile/external/spm')
+          cd .compile/external/spm
           SPM_RELEASE=${tag:0:2}
           date=$(date +'%d-%b-%Y')
           version_line="% Version $tag (SPM${SPM_RELEASE}) $date"
           echo "version_line=$version_line"
           sed "2s/.*/$version_line/" Contents.m > tmp && mv tmp Contents.m
-          cd('../../../')
+          cd ../../../
 
       - name: Build CTF
         uses: matlab-actions/run-command@v2
