@@ -6,9 +6,9 @@ __all__ = [
 import matlab_runtime
 
 from ._version import __version__, __matlab_release__
-from . import _spm_compiled
+from . import _spm
 
 matlab_runtime.init(__matlab_release__, install_if_missing=True)
 
-_deployed = matlab_runtime.import_deployed(_spm_compiled)
+_deployed = matlab_runtime.import_deployed(_spm)
 endpoint = _deployed.mpython_endpoint
