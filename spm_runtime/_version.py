@@ -1,2 +1,2 @@
-__version__ = "{version}"
-__matlab_release__ = "{release}"
+__version__ = "25.01.01"
+__matlab_release__ = "R2024b"
