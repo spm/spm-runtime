@@ -31,7 +31,7 @@ jobs:
       - name: Check out SPM
         uses: actions/checkout@v4
         with:
-          repository: https://github.com/spm/spm
+          repository: spm/spm
           ref: ${{ inputs.spm-version }}
           fetch-depth: 0
           path: .compile/external/spm
@@ -49,14 +49,14 @@ jobs:
       - name: Check out MPython
         uses: actions/checkout@v4
         with:
-          repository: https://github.com/MPython-Package-Factory/mpython
+          repository: MPython-Package-Factory/mpython
           fetch-depth: 0
           path: .compile/external/mpython
 
       - name: Check out SPM-Runtime
         uses: actions/checkout@v4
         with:
-          repository: https://github.com/MPython-Package-Factory/mpython
+          repository: balbasty/spm-runtime
           fetch-depth: 0
           path: .compile/external/spm-runtime
 
