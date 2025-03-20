@@ -1,0 +1,83 @@
+name: Compile CTF
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      spm-version:
+        description: 'SPM Commit / Branch / Tag / SHA to checkout'
+        required: false
+        default: ''
+        type: string
+      matlab-version:
+        description: 'MATLAB release'
+        required: false
+        default: 'R2024b'
+        type: string
+
+jobs:
+  compile:
+    steps:
+
+      - name: Check out SPM
+        uses: actions/checkout@v4
+        with:
+          repository: https://github.com/spm/spm
+          ref: ${{ inputs.spm-version }}
+          fetch-depth: 0
+          path: .compile/external/spm
+
+      - name: Save tag name
+        if: ${{ inputs.spm-version }} != ""
+        run: |
+          echo "tag=${{ inputs.spm-version }}" >> "$GITHUB_ENV"
+
+      - name: Guess tag name
+        if: ${{ inputs.spm-version }} == ""
+        run: |
+          echo "tag=$( git describe --tags $(git rev-list --tags --max-count=1) ).dev" >> "$GITHUB_ENV"
+
+      - name: Check out MPython
+        uses: actions/checkout@v4
+        with:
+          repository: https://github.com/MPython-Package-Factory/mpython
+          fetch-depth: 0
+          path: .compile/external/mpython
+
+      - name: Check out SPM-Runtime
+        uses: actions/checkout@v4
+        with:
+          repository: https://github.com/MPython-Package-Factory/mpython
+          fetch-depth: 0
+          path: .compile/external/spm-runtime
+
+      - name: Set up MATLAB
+        id: setup_matlab
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          release: ${{inputs.matlab-version}}
+          products: MATLAB_Compiler
+
+      - name: Set Version and date in Contents.m
+        shell: bash
+        # Replace the second line of Contents.m with the version line
+        run: |
+          cd('.compile/external/spm')
+          SPM_RELEASE=${tag:0:2}
+          date=$(date +'%d-%b-%Y')
+          version_line="% Version $tag (SPM${SPM_RELEASE}) $date"
+          echo "version_line=$version_line"
+          sed "2s/.*/$version_line/" Contents.m > tmp && mv tmp Contents.m
+          cd('../../../')
+
+      - name: Build CTF
+        uses: matlab-actions/run-command@v2
+        with:
+          command: |
+            addpath('.compile/external/spm-python/scripts');
+            spm_make_python('.compile')
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: spm_${{ inputs.matlab-version }}_${{ inputs.spm-version }}.ctf
+          path: .compile/spm/_spm/_spm.ctf
