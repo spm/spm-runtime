@@ -7,14 +7,20 @@ __all__ = [
 import sys
 from ._version import __version__, __matlab_release__
 from ._endpoint import endpoint
+from ._standalone import standalone
+
 
 if sys.platform == "darwin":
     from matlab_runtime.cli import mwpython2
 
-    def standalone(args=None):
+    def _standalone_entrypoint(args=None):
         if args is None:
             args = sys.argv[1:]
-        return mwpython2(["-m", "spm_runtime._standalone", *args])
+        return mwpython2([
+            "-variant", __matlab_release__,
+            "-m", "spm_runtime",
+            *args
+        ])
 
 else:
-    from ._standalone import standalone
+    _standalone_entrypoint = standalone

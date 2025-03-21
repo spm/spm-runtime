@@ -25,7 +25,7 @@ Homepage = "https://github.com/balbasty/spm-runtime"
 Issues = "https://github.com/balbasty/spm-runtime/issues"
 
 [project.scripts]
-spm = "spm_runtime:standalone"
+spm = "spm_runtime:_standalone_entrypoint"
 
 [tool.setuptools]
 packages = [ "spm_runtime",]
