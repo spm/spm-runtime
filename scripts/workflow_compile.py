@@ -102,6 +102,7 @@ def compile(spm_version=None, matlab_release="R2024b", odir="."):
         ])
 
         # Copy CTF
+        os.makedirs(odir, exist_ok=True)
         shutil.move(
             os.path.join(compile_dir, "spm/_spm/_spm.ctf"),
             os.path.join(odir, f"spm_{matlab_release}_{spm_runtime_version}.ctf")
