@@ -2,7 +2,7 @@
 class _Endpoint:
     # Lazy mpython endpoint.
     # This is so the matlab runtime is only intiialized if the endpoint
-    # is used. This allows us to implement a `spm_standalone` endpoint
+    # is used. This allows us to implement a `spm_standalone` entrypoint
     # that calls mwpython2 if needed.
 
     def __init__(self):
