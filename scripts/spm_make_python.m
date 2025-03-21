@@ -1,6 +1,6 @@
 function spm_make_python(outdir)
 %
-% outdir - Path to output directory.
+% outdir - Path to working/output directory.
 %          If this path contains `external/spm` and `external/mpython`
 %          folders, they will be used. Otherwise, they will be pulled
 %          from github.
@@ -20,6 +20,9 @@ if nargin < 1, [outdir, ~, ~] = fileparts(mfilename('fullpath')); end
 
 cd(outdir);
 
+% -------------------------------------------------------------------------
+% External directory that contains spm and mpython
+% -------------------------------------------------------------------------
 if ~exist('external', 'dir'), mkdir('external'); end
 cd('external')
 if ~exist('spm', 'dir')
@@ -30,6 +33,9 @@ if ~exist('mpython', 'dir')
 end
 cd('..')
 
+% -------------------------------------------------------------------------
+% Directory that contains a "cleaned up" version of spm
+% -------------------------------------------------------------------------
 if exist('cleaned', 'dir')
     rmdir('cleaned', 's');
 end
@@ -43,6 +49,7 @@ addpath(fullfile('external', 'mpython'), spmpath);
 spm('defaults', 'eeg');
 spm_jobman('initcfg')
 
+% Create Contents.txt file used by spm('version')
 copyfile(fullfile(spm('Dir'),'Contents.m'),...
          fullfile(spm('Dir'),'Contents.txt'));
 
@@ -58,16 +65,17 @@ ignored = {...
     'toolbox/DEM/ADEM_saccades.mat',...
 };
 for d = ignored
-    if exist(fullfile(spmpath, d{1}), 'dir')
+    try
         rmdir(fullfile(spmpath, d{1}), 's');
-    elseif exist(fullfile(spmpath, d{1}), 'file')
+    end
+    try
         delete(fullfile(spmpath, d{1}));
     end
 end
 
-%==========================================================================
-%-Static listing of SPM toolboxes
-%==========================================================================
+% -------------------------------------------------------------------------
+% Static listing of SPM toolboxes
+% -------------------------------------------------------------------------
 fid = fopen(fullfile(spm('Dir'),'config','spm_cfg_static_tools.m'),'wt');
 fprintf(fid,'function values = spm_cfg_static_tools\n');
 fprintf(fid,...
@@ -93,18 +101,15 @@ end
 fprintf(fid,'values = {%s};\n', ftstr);
 fclose(fid);
 
-%==========================================================================
-%-Static listing of batch application initialisation files
-%==========================================================================
+% -------------------------------------------------------------------------
+% Static listing of batch application initialisation files
+% -------------------------------------------------------------------------
 cfg_util('dumpcfg');
 
-toolboxes = {
-    'parfor', ...
-    'stats', ...
-    'images',...
-    'signal'...
-};
-
+% -------------------------------------------------------------------------
+% Compile
+% -------------------------------------------------------------------------
+toolboxes = {'parfor', 'stats', 'images', 'signal'};
 mpython_compile(spmpath, outdir, 'spm', toolboxes)
 
 disp('Done!');
