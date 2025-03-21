@@ -21,7 +21,7 @@ $ pip install spm-runtime-R2024b==25.01
 On installation, `spm-runtime` exposes the SPM standalone, which can
 be executed in a terminal by calling `spm`.
 
-```shell
+```text
 $ spm --help
 
 SPM - Statistical Parametric Mapping
