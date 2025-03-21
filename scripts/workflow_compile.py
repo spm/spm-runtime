@@ -36,7 +36,6 @@ def compile(spm_version=None, matlab_release="R2024b", odir="."):
             # Checkout version
             subprocess.run(["git", "fetch", "origin", spm_version])
             subprocess.run(["git", "reset", "--hard", "FETCH_HEAD"])
-            spm_runtime_version = spm_version
         else:
             # Guess version
             # -> We use the most recent tag and add ".dev"
@@ -46,13 +45,45 @@ def compile(spm_version=None, matlab_release="R2024b", odir="."):
             spm_version = subprocess.run([
                 "git", "describe", "--tags", sha
             ], capture_output=True).stdout.decode().strip()
-            spm_runtime_version = spm_version + ".dev"
             print("Guessed version:", spm_version)
 
         # Save hash
         sha = subprocess.run([
             "git", "rev-parse", "HEAD"
         ], capture_output=True).stdout.decode().strip()
+
+        # Check if dev
+        spm_runtime_version = spm_version
+        this_version = spm_version = subprocess.run([
+            "git", "describe", "--tags"
+        ], capture_output=True).stdout.decode().strip()
+
+        # Check if this is a post-release
+        spm_runtime_versions = subprocess.run([
+            "git", "tag"
+        ], capture_output=True).stdout.decode().strip().split('\n')
+        spm_runtime_versions = [x.strip() for x in spm_runtime_versions]
+
+        if "-" in this_version:
+            key = ".dev"
+        else:
+            key = ".post"
+
+        if spm_runtime_version in spm_runtime_versions:
+            if any(
+                x.startswith(spm_runtime_version + key)
+                for x in spm_runtime_versions
+            ):
+                # there are already post releases -> increment by one
+                post = max(
+                    int(x[len(spm_runtime_version + key):])
+                    for x in spm_runtime_versions
+                    if x.startswith(spm_runtime_version + key)
+                ) + 1
+            else:
+                # First post-release
+                post = 1
+            spm_runtime_version += f"{key}{post}"
 
         # Guess date
         date = subprocess.run([
