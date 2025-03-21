@@ -2,13 +2,19 @@ __all__ = [
     "__version__",
     "__matlab_release__",
     "endpoint",
+    "standalone",
 ]
-import matlab_runtime
-
+import sys
 from ._version import __version__, __matlab_release__
-from . import _spm
+from ._endpoint import endpoint
 
-matlab_runtime.init(__matlab_release__, install_if_missing=True)
+if sys.platform == "darwin":
+    from matlab_runtime.cli import mwpython2
 
-_deployed = matlab_runtime.import_deployed(_spm)
-endpoint = _deployed.mpython_endpoint
+    def standalone(args=None):
+        if args is None:
+            args = sys.argv[1:]
+        return mwpython2(["-m", "spm_runtime._standalone", *args])
+
+else:
+    from ._standalone import standalone
