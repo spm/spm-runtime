@@ -4,7 +4,7 @@ Compiled SPM package that can be called from Python
 ## Installation
 
 ```shell
-$ pip install git+https://github.com/balbasty/spm-runtime
+$ pip install git+https://github.com/spm/spm-runtime
 ```
 
 Once deployed, installation will be possible through:
