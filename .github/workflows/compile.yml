@@ -37,11 +37,7 @@ jobs:
           path: .compile/spm.env
 
       - name: Set version in env
-        # Sets:
-        #   VERSION
-        #   SPM_VERSION
-        #   SPM_SHA
-        #   SPM_DATE
+        # Sets [VERSION, SPM_VERSION, SPM_SHA, SPM_DATE]
         run: |
           cat .compile/spm.env >> "$GITHUB_ENV"
 
