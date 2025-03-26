@@ -1,0 +1,111 @@
+name: Compile CTF (test)
+
+on:
+  workflow_dispatch:
+    inputs:
+      spm-version:
+        description: 'SPM Commit / Branch / Tag / SHA to checkout'
+        required: false
+        default: 'main'
+      matlab-version:
+        description: 'MATLAB release'
+        required: false
+        default: 'R2024b'
+
+env:
+  MLM_LICENSE_TOKEN: ${{ secrets.MATLAB_BATCH_TOKEN }}
+
+jobs:
+
+  guess-version:
+    uses: ./.github/workflows/guess_version.yml
+    with:
+      spm-version: ${{ inputs.spm-version }}
+
+  compile:
+    needs: guess-version
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Retrieve version
+        uses: actions/download-artifact@v4
+        with:
+          name: spm_${{ inputs.spm-version }}.env
+
+      - name: Set version in env
+        # Sets [VERSION, SPM_VERSION, SPM_SHA, SPM_DATE]
+        run: |
+          cat spm.env >> "$GITHUB_ENV"
+
+      - name: Check out SPM runtime
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: external/spm-runtime
+
+      - name: Check out SPM
+        uses: actions/checkout@v4
+        with:
+          repository: spm/spm
+          ref: ${{ inputs.spm-version }}
+          fetch-depth: 0
+          path: external/spm
+
+      - name: Check out MPython
+        uses: actions/checkout@v4
+        with:
+          repository: MPython-Package-Factory/mpython
+          fetch-depth: 0
+          path: external/mpython
+
+      - name: Set up MATLAB (legacy)
+        if: >
+          ${{(
+            inputs.matlab-version == 'R2020a' ||
+            inputs.matlab-version == 'R2020b' ||
+            inputs.matlab-version == 'R2022a' ||
+            inputs.matlab-version == 'R2022b'
+          )}}
+        uses: matlab-actions/setup-matlab@v1
+        with:
+          release: ${{inputs.matlab-version}}
+          products: MATLAB_Compiler
+
+      - name: Set up MATLAB
+        if: >
+          ${{(
+            inputs.matlab-version != 'R2020a' &&
+            inputs.matlab-version != 'R2020b' &&
+            inputs.matlab-version != 'R2022a' &&
+            inputs.matlab-version != 'R2022b'
+          )}}
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          release: ${{inputs.matlab-version}}
+          products: MATLAB_Compiler
+
+      - name: Set Version and date in Contents.m
+        shell: bash
+        # Replace the second line of Contents.m with the version line
+        run: |
+          cd external/spm
+          SPM_RELEASE=${SPM_VERSION:0:2}
+          version_line="% Version $SPM_VERSION (SPM${SPM_RELEASE}) $SPM_DATE"
+          echo "version_line=$version_line"
+          sed "2s/.*/$version_line/" Contents.m > tmp && mv tmp Contents.m
+          cd ../..
+
+      - name: Build CTF
+        uses: matlab-actions/run-command@v2
+        with:
+          command: |
+            addpath('external/spm-runtime/scripts');
+            spm_make_python('.')
+
+      - run: mv spm/_spm/_spm.ctf spm.ctf
+
+      - name: Upload CTF
+        uses: actions/upload-artifact@v4
+        with:
+          name: spm_${{ inputs.spm-version }}_${{ inputs.matlab-version }}.ctf
+          path: spm.ctf
