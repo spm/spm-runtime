@@ -10,7 +10,7 @@ on:
       spm-version:
         description: 'SPM Commit / Branch / Tag / SHA to checkout'
         required: false
-        default: 'latest'
+        default: 'main'
       matlab-version:
         description: 'MATLAB release'
         required: false
