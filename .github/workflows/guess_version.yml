@@ -85,7 +85,7 @@ jobs:
             SPM_VERSION="$SPM_VERSION_CURRENT"
             POST_KEY=".post"
           fi
-
+          
           cd ../spm-runtime
 
           # Read all spm-runtime tags
