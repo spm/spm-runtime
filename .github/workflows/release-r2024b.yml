@@ -3,7 +3,7 @@ description: Compile, Build, Publish on PyPI, Release on GitHub
 
 on:
   workflow_run:
-    workflows: [] #[Release]
+    workflows: [Release]
     types:
       - completed
 
