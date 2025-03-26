@@ -1,6 +1,7 @@
-# Folder created by actions/scripts
-.compile/
+*.ctf
 
+# MacOS
+.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

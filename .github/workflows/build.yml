@@ -1,0 +1,100 @@
+name: Build distribution
+
+on:
+  workflow_call:
+    inputs:
+      spm-version:
+        description: 'SPM Commit / Branch / Tag / SHA to checkout'
+        required: false
+        default: ''
+        type: string
+      matlab-version:
+        description: 'MATLAB release'
+        required: false
+        default: 'R2024b'
+        type: string
+      main-package:
+        description: 'Build main package (no matlab tag)'
+        required: false
+        default: false
+        type: boolean
+
+
+jobs:
+  publish-pypi:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Retrieve version
+        uses: actions/download-artifact@v4
+        with:
+          name: spm_${{ inputs.spm-version }}.env
+          path: .compile/spm.env
+
+      - name: Set version in env
+        # Sets:
+        #   VERSION
+        #   SPM_VERSION
+        #   SPM_SHA
+        #   SPM_DATE
+        run: |
+          cat .compile/spm.env >> "$GITHUB_ENV"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+
+      - name: Check out spm-runtime
+        uses: actions/checkout@v4
+
+      - name: Install matlab-runtime
+        run: |
+          python -m pip install --upgrade pip matlab-runtime
+
+      - name: Create version-specific package
+        if: inputs.main-package == true
+        run: |
+          python scripts/spm_make_runtime.py \
+            --matlab-version ${{ inputs.matlab-version }} \
+            --spm-version ${VERSION} \
+            --spm-sha ${SPM_SHA} \
+            --main-package
+
+      - name: Create version-specific package
+        if: inputs.main-package == false
+        run: |
+          python scripts/spm_make_package.py \
+            --matlab-version ${{ inputs.matlab-version }} \
+            --spm-version ${VERSION} \
+            --spm-sha ${SPM_SHA}
+
+      - name: Download CTF
+        uses: actions/download-artifact@v4
+        with:
+          name: spm_${{ inputs.spm-version }}_${{ inputs.matlab-version }}.ctf
+
+      - name: Move CTF
+        run: |
+          mv spm_${{ inputs.matlab-version }}_${{ inputs.spm-version }}.ctf \
+             spm_runtime/_spm/_spm.ctf
+
+      - name: Push changes
+        if: inputs.main-package == true
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add pyproject.toml spm_runtime/_version.py
+          git commit -m "[Release] ${VERSION}"
+          git tag ${VERSION}
+          git push --tags
+
+      - name: Install dependencies for building package
+        run: python -m pip install --upgrade build
+
+      - name: Build distribution 📦
+        run: python -m build
+
+      - name: Store the distribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: spm_${{ inputs.spm-version }}_${{ inputs.matlab-version }}.dist
+          path: dist/
