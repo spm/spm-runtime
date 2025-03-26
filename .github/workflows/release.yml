@@ -1,16 +1,20 @@
 name: Release
 description: Compile, Build, Publish on PyPI, Release on GitHub
 
+# I store spm-version in run-name so that it can be retrived in release-rXXXXY
+run-name: ${{ inputs.spm-version }}
+
 on:
   workflow_dispatch:
     inputs:
       spm-version:
         description: 'SPM Commit / Branch / Tag / SHA to checkout'
         required: false
-        default: ''
-
-env:
-  MATLAB_LATEST: R2024b
+        default: 'latest'
+      matlab-version:
+        description: 'MATLAB release'
+        required: false
+        default: 'R2024b'
 
 # ======================================================================
 
@@ -30,26 +34,15 @@ jobs:
     needs: guess-version
     runs-on: ubuntu-latest
 
-    strategy:
-      fail-fast: False
-      matrix:
-        matlab-version: [
-          "R2020a", "R2020b",
-          "R2021a", "R2021b",
-          "R2022a", "R2022b",
-          "R2023a", "R2023b",
-          "R2024a", "R2024b",
-        ]
-
     steps:
       - name: Compile
         uses: ./.github/workflows/compile
         with:
-          matlab-version: ${{ matrix.matlab-version }}
           spm-version: ${{ inputs.spm-version }}
+          matlab-version: ${{ inputs.matlab-version }}
 
   # --------------------------------------------------------------------
-  publish-main:
+  publish-pypi:
     runs-on: ubuntu-latest
     needs: compile
 
@@ -69,13 +62,13 @@ jobs:
       uses: ./.github/workflows/build
       with:
         spm-version: ${{ inputs.spm-version }}
-        matlab-version: ${{ env.MATLAB_LATEST }}
+        matlab-version: ${{ inputs.matlab-version }}
         main-package: true
 
     - name: Download distribution
       uses: actions/download-artifact@v4
       with:
-        name: spm_${{ inputs.spm-version }}_${{ env.MATLAB_LATEST }}.dist
+        name: spm_${{ inputs.spm-version }}_${{ inputs.matlab-version }}.dist
         path: dist/
 
     - name: Publish distribution 📦 to PyPI
@@ -84,62 +77,10 @@ jobs:
         repository-url: https://test.pypi.org/legacy/
 
   # --------------------------------------------------------------------
-  publish-matrix:
-    runs-on: ubuntu-latest
-    needs: publish-main
-
-    environment:
-      # name: pypi
-      # url: https://pypi.org/p/spm-runtime
-
-      name: testpypi
-      url: https://test.pypi.org/p/spm-runtime
-
-    permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
-
-    strategy:
-      fail-fast: False
-      matrix:
-        matlab-version: [
-          "R2020a", "R2020b",
-          "R2021a", "R2021b",
-          "R2022a", "R2022b",
-          "R2023a", "R2023b",
-          "R2024a", "R2024b",
-        ]
-
-    steps:
-
-      - name: Compile
-        uses: ./.github/workflows/compile
-        with:
-          matlab-version: ${{ matrix.matlab-version }}
-          spm-version: ${{ inputs.spm-version }}
-
-      - name: Build
-        uses: ./.github/workflows/build
-        with:
-          spm-version: ${{ inputs.spm-version }}
-          matlab-version: ${{ matrix.matlab-version }}
-          main-package: false
-
-      - name: Download distribution
-        uses: actions/download-artifact@v4
-        with:
-          name: spm_${{ inputs.spm-version }}_${{ matrix.matlab-version }}.dist
-          path: dist/
-
-      - name: Publish distribution 📦 to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-
-  # --------------------------------------------------------------------
   github-release:
     runs-on: ubuntu-latest
     name: Sign the Package with Sigstore and upload it to GitHub Release
-    needs: publish-main
+    needs: publish-pypi
 
     permissions:
       contents: write  # IMPORTANT: mandatory for making GitHub Releases
@@ -149,7 +90,7 @@ jobs:
     - name: Download all the dists
       uses: actions/download-artifact@v4
       with:
-        name: spm_${{ inputs.spm-version }}_${{ env.MATLAB_LATEST }}.dist
+        name: spm_${{ inputs.spm-version }}_${{ inputs.matlab-version }}.dist
         path: dist/
 
     - name: Sign the dists with Sigstore

@@ -1,12 +1,30 @@
 name: Build distribution
 
 on:
+  workflow_dispatch:
+    inputs:
+      spm-version:
+        description: 'SPM Commit / Branch / Tag / SHA to checkout'
+        required: false
+        default: 'main'
+        type: string
+      matlab-version:
+        description: 'MATLAB release'
+        required: false
+        default: 'R2024b'
+        type: string
+      main-package:
+        description: 'Build main package (no matlab tag)'
+        required: false
+        default: false
+        type: boolean
+
   workflow_call:
     inputs:
       spm-version:
         description: 'SPM Commit / Branch / Tag / SHA to checkout'
         required: false
-        default: ''
+        default: 'main'
         type: string
       matlab-version:
         description: 'MATLAB release'
