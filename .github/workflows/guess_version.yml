@@ -55,8 +55,6 @@ jobs:
         env:
           INCREASE: ${{ inputs.increase-post }}
         run: |
-          echo "INCREASE=$INCREASE"
-
           # Helper
           array_contains () {
               local array="$1[@]"
@@ -121,11 +119,11 @@ jobs:
           done
 
           if [ ${EXISTS} = true ]; then
-            if [[ $INCREASE == "true" ]]; then
+            if [[ "$INCREASE" == "true" ]]; then
               POST_VAL=$(( ${POST_VAL} + 1 ))
-            end
+            fi
             RUNTIME_VERSION="${SPM_VERSION}${POST_KEY}${POST_VAL}"
-          elif [[ $POST_KEY == ".dev" ]]; then
+          elif [[ "$POST_KEY" == ".dev" ]]; then
             RUNTIME_VERSION="${SPM_VERSION}.dev1"
           else
             RUNTIME_VERSION="${SPM_VERSION}"
