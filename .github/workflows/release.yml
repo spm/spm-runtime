@@ -24,11 +24,8 @@ jobs:
   guess-version:
     runs-on: ubuntu-latest
     steps:
-    - name: Check out
-      uses: actions/checkout@v4
-
     - name: Guess version
-      uses: ./.github/workflows/guess_version
+      uses: ./.github/workflows/guess_version.yml
       with:
         spm-version: ${{ inputs.spm-version }}
 
@@ -37,11 +34,8 @@ jobs:
     needs: guess-version
     runs-on: ubuntu-latest
     steps:
-    - name: Check out
-      uses: actions/checkout@v4
-
     - name: Compile
-      uses: ./.github/workflows/compile
+      uses: ./.github/workflows/compile.yml
       with:
         spm-version: ${{ inputs.spm-version }}
         matlab-version: ${{ inputs.matlab-version }}
@@ -63,11 +57,8 @@ jobs:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
 
     steps:
-    - name: Check out
-      uses: actions/checkout@v4
-
     - name: Build
-      uses: ./.github/workflows/build
+      uses: ./.github/workflows/build.yml
       with:
         spm-version: ${{ inputs.spm-version }}
         matlab-version: ${{ inputs.matlab-version }}
