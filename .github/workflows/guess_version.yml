@@ -119,7 +119,7 @@ jobs:
           done
 
           if [ ${EXISTS} = true ]; then
-            if [ ${INCREASE} = true ]; then
+            if [[ ${INCREASE} == "true" ]]; then
               POST_VAL=$(( ${POST_VAL} + 1 ))
             end
             RUNTIME_VERSION="${SPM_VERSION}${POST_KEY}${POST_VAL}"
