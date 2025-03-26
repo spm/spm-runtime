@@ -6,7 +6,7 @@ from matlab_runtime.utils import SUPPORTED_PYTHON_VERSIONS
 def _make_parser():
     p = argparse.ArgumentParser()
     p.add_argument("--matlab-version", required=True)
-    p.add_argument("--spm-version", required=True)
+    p.add_argument("--spm-version")
     p.add_argument("--spm-sha")
     p.add_argument("--main-package", action='store_true')
     return p
@@ -55,7 +55,8 @@ def _main():
         project['name'] = "spm-runtime"
     else:
         project['name'] = f"spm-runtime-{R}"
-    project['version'] = V
+    if V:
+        project['version'] = V
     project['requires-python'] = _requires_python(python_versions)
     project['classifiers'] = [
         classifier for classifier in project['classifiers']
@@ -69,7 +70,18 @@ def _main():
         toml.dump(pyproject, f)
 
     # Fix _version.py
+    with open("spm_runtime/_version.py", "rt") as f:
+        input_metadata = {}
+        for line in f:
+            if not line.strip():
+                continue
+            key, val = f.split("=")
+            key, val = key.strip(), val.strip()
+            input_metadata[key, val]
+
     with open("spm_runtime/_version.py", "wt") as f:
+        V = V or input_metadata["__version__"]
+        S = S or input_metadata.get("__spm_sha__", None)
         lines = [
             f'__version__ = "{V}"',
             f'__matlab_release__ = "{R}"',

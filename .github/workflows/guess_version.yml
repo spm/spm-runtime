@@ -16,13 +16,14 @@ on:
       spm-version:
         description: 'SPM Commit / Branch / Tag / SHA to checkout'
         required: false
-        default: ''
+        default: 'main'
+
   workflow_call:
     inputs:
       spm-version:
         description: 'SPM Commit / Branch / Tag / SHA to checkout'
         required: false
-        default: ''
+        default: 'main'
         type: string
 
 jobs:
@@ -73,18 +74,18 @@ jobs:
           echo "SPM_DATE=${SPM_DATE}" >> "$GITHUB_OUTPUT"
           echo "SPM_DATE=${SPM_DATE}" >> "$GITHUB_ENV"
 
-          if [ -z ${{ inputs.spm-version }} ]; then
-            # Read checked out SPM tag
-            SPM_VERSION="${{ inputs.spm-version }}""
-          else
-            # Checked out latest -> read most recent SPM tag
-            SPM_VERSION="$( git describe --tags $(git rev-list --tags --max-count=1) )"
-          fi
-
           # Check if current SPM tag is a release or a dev
           SPM_VERSION_CURRENT="$( git describe --tags )"
-          [[ $SPM_VERSION_CURRENT =~ "-" ]] && POST_KEY=".dev" || POST_KEY=".post"
-
+          if [[ $SPM_VERSION_CURRENT =~ "-" ]]; then
+            # Checked out latest -> read most recent SPM tag
+            SPM_VERSION="$( git describe --tags $(git rev-list --tags --max-count=1) )"
+            POST_KEY=".dev"
+          else
+            # Checked out an exact tag
+            SPM_VERSION="$SPM_VERSION_CURRENT"
+            POST_KEY=".post"
+          fi
+          
           cd ../spm-runtime
 
           # Read all spm-runtime tags
