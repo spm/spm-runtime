@@ -47,7 +47,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: spm_${{ inputs.spm-version }}.env
-          path: .
 
       - name: Set version in env
         # Sets:
