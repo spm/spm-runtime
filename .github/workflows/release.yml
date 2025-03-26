@@ -45,9 +45,8 @@ jobs:
 
   # --------------------------------------------------------------------
   publish-pypi:
-
-    runs-on: ubuntu-latest
     needs: compile
+    runs-on: ubuntu-latest
 
     environment:
       # name: pypi
@@ -74,9 +73,9 @@ jobs:
 
   # --------------------------------------------------------------------
   github-release:
+    needs: publish-pypi
     runs-on: ubuntu-latest
     name: Sign the Package with Sigstore and upload it to GitHub Release
-    needs: publish-pypi
 
     permissions:
       contents: write  # IMPORTANT: mandatory for making GitHub Releases
