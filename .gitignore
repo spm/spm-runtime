@@ -1,6 +1,4 @@
-# Folder created by actions/scripts
-.compile/
-
+*.ctf
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
