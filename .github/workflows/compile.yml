@@ -33,7 +33,7 @@ jobs:
       - name: Retrieve version
         uses: actions/download-artifact@v4
         with:
-          name: spm.env
+          name: spm_${{ inputs.spm-version }}.env
 
       - name: Set version in env
         # Sets [VERSION, SPM_VERSION, SPM_SHA, SPM_DATE]
