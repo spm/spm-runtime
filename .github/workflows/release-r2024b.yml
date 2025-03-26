@@ -18,32 +18,26 @@ jobs:
   # --------------------------------------------------------------------
   guess-version:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    runs-on: ubuntu-latest
-    steps:
-    - uses: ./.github/workflows/guess_version.yml
-      with:
-        spm-version: ${{ env.SPM_VERSION }}
+    uses: ./.github/workflows/guess_version.yml
+    with:
+      spm-version: ${{ env.SPM_VERSION }}
 
   # --------------------------------------------------------------------
   compile:
     needs: guess-version
-    runs-on: ubuntu-latest
-    steps:
-    - uses: ./.github/workflows/compile.yml
-      with:
-        spm-version: ${{ env.SPM_VERSION }}
-        matlab-version: ${{ env.MATLAB_VERSION }}
+    uses: ./.github/workflows/compile.yml
+    with:
+      spm-version: ${{ env.SPM_VERSION }}
+      matlab-version: ${{ env.MATLAB_VERSION }}
 
   # --------------------------------------------------------------------
   build:
     needs: compile
-    runs-on: ubuntu-latest
-    steps:
-    - uses: ./.github/workflows/build.yml
-      with:
-        spm-version: ${{ env.SPM_VERSION }}
-        matlab-version: ${{ env.MATLAB_VERSION }}
-        main-package: true
+    uses: ./.github/workflows/build.yml
+    with:
+      spm-version: ${{ env.SPM_VERSION }}
+      matlab-version: ${{ env.MATLAB_VERSION }}
+      main-package: false
 
   # --------------------------------------------------------------------
   publish-pypi:
