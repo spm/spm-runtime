@@ -34,12 +34,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: spm_${{ inputs.spm-version }}.env
-          path: .compile/spm.env
+          path: .
 
       - name: Set version in env
         # Sets [VERSION, SPM_VERSION, SPM_SHA, SPM_DATE]
         run: |
-          cat .compile/spm.env >> "$GITHUB_ENV"
+          cat spm_${{ inputs.spm-version }}.env >> "$GITHUB_ENV"
 
       - name: Check out SPM runtime
         uses: actions/checkout@v4
