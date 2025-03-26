@@ -39,7 +39,7 @@ on:
 
 
 jobs:
-  publish-pypi:
+  build:
     runs-on: ubuntu-latest
     steps:
 

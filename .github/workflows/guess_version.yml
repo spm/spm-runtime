@@ -27,7 +27,7 @@ on:
         type: string
 
 jobs:
-  compile:
+  guess-version:
     runs-on: ubuntu-latest
     steps:
 
@@ -85,7 +85,7 @@ jobs:
             SPM_VERSION="$SPM_VERSION_CURRENT"
             POST_KEY=".post"
           fi
-          
+
           cd ../spm-runtime
 
           # Read all spm-runtime tags
