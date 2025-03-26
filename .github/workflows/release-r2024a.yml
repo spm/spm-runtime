@@ -20,6 +20,8 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Check out
+        uses: actions/checkout@v4
       - name: Guess version
         uses: ./.github/workflows/guess_version
         with:
@@ -29,8 +31,9 @@ jobs:
   compile:
     needs: guess-version
     runs-on: ubuntu-latest
-
     steps:
+      - name: Check out
+        uses: actions/checkout@v4
       - name: Compile
         uses: ./.github/workflows/compile
         with:
@@ -53,6 +56,9 @@ jobs:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
 
     steps:
+
+    - name: Check out
+      uses: actions/checkout@v4
 
     - name: Build
       uses: ./.github/workflows/build

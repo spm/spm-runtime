@@ -47,7 +47,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: spm_${{ inputs.spm-version }}.env
-          path: .compile/spm.env
+          path: spm.env
 
       - name: Set version in env
         # Sets:
@@ -56,7 +56,7 @@ jobs:
         #   SPM_SHA
         #   SPM_DATE
         run: |
-          cat .compile/spm.env >> "$GITHUB_ENV"
+          cat spm.env >> "$GITHUB_ENV"
 
       - name: Set up Python
         uses: actions/setup-python@v5
