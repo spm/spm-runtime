@@ -28,68 +28,69 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+      - name: Retrieve version
+        uses: actions/download-artifact@v4
+        with:
+          name: spm_${{ inputs.spm-version }}.env
+          path: .compile/spm.env
+
+      - name: Set version in env
+        # Sets:
+        #   VERSION
+        #   SPM_VERSION
+        #   SPM_SHA
+        #   SPM_DATE
+        run: |
+          cat .compile/spm.env >> "$GITHUB_ENV"
+
+      - name: Check out SPM runtime
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: external/spm-runtime
+
       - name: Check out SPM
         uses: actions/checkout@v4
         with:
           repository: spm/spm
           ref: ${{ inputs.spm-version }}
           fetch-depth: 0
-          path: .compile/external/spm
-
-      - name: Save tag name
-        if: ${{ inputs.spm-version }} != ""
-        run: |
-          echo "tag=${{ inputs.spm-version }}" >> "$GITHUB_ENV"
-
-      - name: Guess tag name
-        if: ${{ inputs.spm-version }} == ""
-        run: |
-          cd .compile/external/spm
-          echo "tag=$( git describe --tags $(git rev-list --tags --max-count=1) ).dev" >> "$GITHUB_ENV"
-          cd ../../..
+          path: external/spm
 
       - name: Check out MPython
         uses: actions/checkout@v4
         with:
           repository: MPython-Package-Factory/mpython
           fetch-depth: 0
-          path: .compile/external/mpython
-
-      - name: Check out SPM-Runtime
-        uses: actions/checkout@v4
-        with:
-          repository: balbasty/spm-runtime
-          fetch-depth: 0
-          path: .compile/external/spm-runtime
+          path: external/mpython
 
       - name: Set up MATLAB
         id: setup_matlab
         uses: matlab-actions/setup-matlab@v2
         with:
-          release: ${{inputs.matlab-version}}
+          release: ${{ inputs.matlab-version }}
           products: MATLAB_Compiler
 
       - name: Set Version and date in Contents.m
         shell: bash
         # Replace the second line of Contents.m with the version line
         run: |
-          cd .compile/external/spm
-          SPM_RELEASE=${tag:0:2}
-          date=$(date +'%d-%b-%Y')
-          version_line="% Version $tag (SPM${SPM_RELEASE}) $date"
+          cd external/spm
+          SPM_RELEASE=${SPM_VERSION:0:2}
+          version_line="% Version $SPM_VERSION (SPM${SPM_RELEASE}) $SPM_DATE"
           echo "version_line=$version_line"
           sed "2s/.*/$version_line/" Contents.m > tmp && mv tmp Contents.m
-          cd ../../../
+          cd ../..
 
       - name: Build CTF
         uses: matlab-actions/run-command@v2
         with:
           command: |
-            addpath('.compile/external/spm-python/scripts');
-            spm_make_python('.compile')
+            addpath('external/spm-runtime/scripts');
+            spm_make_python('.')
 
-      - name: Upload artifact
+      - name: Upload CTF
         uses: actions/upload-artifact@v4
         with:
-          name: spm_${{ inputs.matlab-version }}_${{ inputs.spm-version }}.ctf
-          path: .compile/spm/_spm/_spm.ctf
+          name: spm_${{ inputs.spm-version }}_${{ inputs.matlab-version }}.ctf
+          path: spm/_spm/_spm.ctf

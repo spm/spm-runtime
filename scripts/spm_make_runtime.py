@@ -8,7 +8,7 @@ def _make_parser():
     p.add_argument("--matlab-version", required=True)
     p.add_argument("--spm-version", required=True)
     p.add_argument("--spm-sha")
-    p.add_argument("--main-project", action='store_true')
+    p.add_argument("--main-package", action='store_true')
     return p
 
 
@@ -51,7 +51,7 @@ def _main():
     # Fix pyproject.toml
     pyproject = toml.load("pyproject.toml")
     project = pyproject.get("project")
-    if p.main_project:
+    if p.main_package:
         project['name'] = "spm-runtime"
     else:
         project['name'] = f"spm-runtime-{R}"

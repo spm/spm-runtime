@@ -1,0 +1,144 @@
+name: Guess version
+description: |
+  This workflow computes the next spm-runtime version for a given
+  spm version, so the the .dev or .post tags are properly incremented.
+
+  It creates an artifact named "spm_{inputs.spm-version}.env" that contains
+  the following definitions:
+    VERSION={next spm-runtime version}
+    SPM_VERSION={corresponding spm version, eventually with .dev}
+    SPM_SHA={hash of the corresponding spm commit}
+    SPM_DATE={date of the corresponding spm commit}
+
+on:
+  workflow_dispatch:
+    inputs:
+      spm-version:
+        description: 'SPM Commit / Branch / Tag / SHA to checkout'
+        required: false
+        default: ''
+  workflow_call:
+    inputs:
+      spm-version:
+        description: 'SPM Commit / Branch / Tag / SHA to checkout'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Check out SPM
+        uses: actions/checkout@v4
+        # I need the entire depth to query tags
+        with:
+          repository: spm/spm
+          ref: ${{ inputs.spm-version }}
+          path: spm
+
+      - name: Check out SPM-runtime
+        uses: actions/checkout@v4
+        # I need the entire depth to query tags
+        with:
+          path: spm-runtime
+
+      - name: Compute tag
+        shell: bash
+        run: |
+          # Helper
+          array_contains () {
+              local array="$1[@]"
+              local seeking=$2
+              local in=1
+              for element in "${!array}"; do
+                  if [[ $element == "$seeking" ]]; then
+                      in=0
+                      break
+                  fi
+              done
+              return $in
+          }
+
+          cd spm
+
+          # Read SPM hash and save
+          SPM_SHA=$( git rev-parse HEAD )
+          echo "SPM_SHA=${SPM_SHA}" >> "$GITHUB_OUTPUT"
+          echo "SPM_SHA=${SPM_SHA}" >> "$GITHUB_ENV"
+
+          # Read SPM commit date and save
+          SPM_DATE=$( git show --no-patch --format=%cs )
+          echo "SPM_DATE=${SPM_DATE}" >> "$GITHUB_OUTPUT"
+          echo "SPM_DATE=${SPM_DATE}" >> "$GITHUB_ENV"
+
+          if [ -z ${{ inputs.spm-version }} ]; then
+            # Read checked out SPM tag
+            SPM_VERSION="${{ inputs.spm-version }}""
+          else
+            # Checked out latest -> read most recent SPM tag
+            SPM_VERSION="$( git describe --tags $(git rev-list --tags --max-count=1) )"
+          fi
+
+          # Check if current SPM tag is a release or a dev
+          SPM_VERSION_CURRENT="$( git describe --tags )"
+          [[ $SPM_VERSION_CURRENT =~ "-" ]] && POST_KEY=".dev" || POST_KEY=".post"
+
+          cd ../spm-runtime
+
+          # Read all spm-runtime tags
+          IFS=$'\n' read -r -d '' -a RUNTIME_VERSIONS < <( git tag && printf '\0' )
+
+          cd ..
+
+          # Compute post/dev increment
+          POST_VAL=0
+          EXISTS=false
+          for RUNTIME_VERSION in "${RUNTIME_VERSIONS[@]}"; do
+            if [[ "$RUNTIME_VERSION" =~ "${SPM_VERSION}${POST_KEY}" ]]
+            then
+              EXISTS=true
+            fi
+            if [[ "$RUNTIME_VERSION" =~ "${SPM_VERSION}${POST_KEY}(\d+)" ]]
+            then
+              if (( ${BASH_REMATCH[1]} -gt ${POST_VAL} )); then
+                POST_VAL=${BASH_REMATCH[1]}
+              fi
+            fi
+          done
+
+          if [ ${EXISTS} = true ]; then
+            POST_VAL = $(( ${POST_VAL} + 1 ))
+            RUNTIME_VERSION="${SPM_VERSION}${POST_KEY}${POST_VAL}"
+          elif [[ $POST_KEY == ".dev" ]]; then
+            RUNTIME_VERSION="${SPM_VERSION}.dev1"
+          else:
+            RUNTIME_VERSION="${SPM_VERSION}""
+          fi
+
+          echo "VERSION=${RUNTIME_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "VERSION=${RUNTIME_VERSION}" >> "$GITHUB_ENV"
+
+          if [[ $POST_KEY == ".dev" ]]; then
+            SPM_VERSION=${SPM_VERSION}${POST_KEY}
+          fi
+
+          echo "SPM_VERSION=${SPM_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "SPM_VERSION=${SPM_VERSION}" >> "$GITHUB_ENV"
+
+      - name: Write versions
+        shell: bash
+        run: |
+          FILENAME="spm.env"
+          [[ -f "$FILENAME" ]] && rm -f "$FILENAME"
+          echo "VERSION=${VERSION}"         >> "$FILENAME"
+          echo "SPM_VERSION=${SPM_VERSION}" >> "$FILENAME"
+          echo "SPM_SHA=${SPM_SHA}"         >> "$FILENAME"
+          echo "SPM_DATE=${SPM_DATE}"       >> "$FILENAME"
+
+      - name: Upload version metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: spm_${{ inputs.spm-version }}.env
+          path: spm.env
