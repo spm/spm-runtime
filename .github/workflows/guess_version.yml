@@ -66,11 +66,13 @@ jobs:
 
           # Read SPM hash and save
           SPM_SHA=$( git rev-parse HEAD )
+          echo "SPM_SHA=${SPM_SHA}"
           echo "SPM_SHA=${SPM_SHA}" >> "$GITHUB_OUTPUT"
           echo "SPM_SHA=${SPM_SHA}" >> "$GITHUB_ENV"
 
           # Read SPM commit date and save
           SPM_DATE=$( git show --no-patch --format=%cs )
+          echo "SPM_DATE=${SPM_DATE}"
           echo "SPM_DATE=${SPM_DATE}" >> "$GITHUB_OUTPUT"
           echo "SPM_DATE=${SPM_DATE}" >> "$GITHUB_ENV"
 
@@ -110,14 +112,15 @@ jobs:
           done
 
           if [ ${EXISTS} = true ]; then
-            POST_VAL = $(( ${POST_VAL} + 1 ))
+            POST_VAL=$(( ${POST_VAL} + 1 ))
             RUNTIME_VERSION="${SPM_VERSION}${POST_KEY}${POST_VAL}"
           elif [[ $POST_KEY == ".dev" ]]; then
             RUNTIME_VERSION="${SPM_VERSION}.dev1"
-          else:
-            RUNTIME_VERSION="${SPM_VERSION}""
+          else
+            RUNTIME_VERSION="${SPM_VERSION}"
           fi
 
+          echo "VERSION=${RUNTIME_VERSION}"
           echo "VERSION=${RUNTIME_VERSION}" >> "$GITHUB_OUTPUT"
           echo "VERSION=${RUNTIME_VERSION}" >> "$GITHUB_ENV"
 
@@ -125,6 +128,7 @@ jobs:
             SPM_VERSION=${SPM_VERSION}${POST_KEY}
           fi
 
+          echo "SPM_VERSION=${SPM_VERSION}"
           echo "SPM_VERSION=${SPM_VERSION}" >> "$GITHUB_OUTPUT"
           echo "SPM_VERSION=${SPM_VERSION}" >> "$GITHUB_ENV"
 
