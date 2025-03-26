@@ -1,11 +1,13 @@
-name: Compile and publish
+name: Release
+description: Compile, Build, Publish on PyPI, Release on GitHub
+
 on:
   workflow_dispatch:
     inputs:
       spm-version:
         description: 'SPM Commit / Branch / Tag / SHA to checkout'
         required: false
-        default: 'latest'
+        default: ''
 
 env:
   MATLAB_LATEST: R2024b

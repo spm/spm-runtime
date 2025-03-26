@@ -1,4 +1,5 @@
 name: Compile CTF
+
 on:
   workflow_dispatch:
     inputs:
