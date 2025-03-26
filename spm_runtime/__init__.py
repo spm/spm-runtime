@@ -2,6 +2,7 @@ __all__ = [
     "__version__",
     "__matlab_release__",
     "endpoint",
+    "mpython_endpoint",
     "standalone",
 ]
 import sys
@@ -10,6 +11,11 @@ from ._endpoint import endpoint
 from ._standalone import standalone
 
 
+# Alias used by the spm-python runtime
+mpython_endpoint = endpoint
+
+
+# Standalone entrypoint
 if sys.platform == "darwin":
     from matlab_runtime.cli import mwpython2
 
