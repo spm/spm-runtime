@@ -21,6 +21,7 @@ jobs:
     uses: ./.github/workflows/guess_version.yml
     with:
       spm-version: ${{ env.SPM_VERSION }}
+      increase-post: false
 
   # --------------------------------------------------------------------
   compile:

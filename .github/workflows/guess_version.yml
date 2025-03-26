@@ -25,6 +25,11 @@ on:
         required: false
         default: 'main'
         type: string
+      increase-post:
+        description: 'Whether to increase the post release (only if main)'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   guess-version:
@@ -47,6 +52,8 @@ jobs:
 
       - name: Compute tag
         shell: bash
+        env:
+          INCREASE: ${{ inputs.increase-post }}
         run: |
           # Helper
           array_contains () {
@@ -112,7 +119,9 @@ jobs:
           done
 
           if [ ${EXISTS} = true ]; then
-            POST_VAL=$(( ${POST_VAL} + 1 ))
+            if [ ${INCREASE} = true ]; then
+              POST_VAL=$(( ${POST_VAL} + 1 ))
+            end
             RUNTIME_VERSION="${SPM_VERSION}${POST_KEY}${POST_VAL}"
           elif [[ $POST_KEY == ".dev" ]]; then
             RUNTIME_VERSION="${SPM_VERSION}.dev1"

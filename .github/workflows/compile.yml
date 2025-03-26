@@ -33,14 +33,12 @@ jobs:
       - name: Retrieve version
         uses: actions/download-artifact@v4
         with:
-          name: spm_${{ inputs.spm-version }}.env
-
-      - run: ls -R
+          name: spm.env
 
       - name: Set version in env
         # Sets [VERSION, SPM_VERSION, SPM_SHA, SPM_DATE]
         run: |
-          cat spm_${{ inputs.spm-version }}.env >> "$GITHUB_ENV"
+          cat spm.env >> "$GITHUB_ENV"
 
       - name: Check out SPM runtime
         uses: actions/checkout@v4
@@ -88,8 +86,10 @@ jobs:
             addpath('external/spm-runtime/scripts');
             spm_make_python('.')
 
+      - run: mv spm/_spm/_spm.ctf spm.ctf
+
       - name: Upload CTF
         uses: actions/upload-artifact@v4
         with:
           name: spm_${{ inputs.spm-version }}_${{ inputs.matlab-version }}.ctf
-          path: spm/_spm/_spm.ctf
+          path: spm.ctf

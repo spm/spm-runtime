@@ -46,7 +46,7 @@ jobs:
       - name: Retrieve version
         uses: actions/download-artifact@v4
         with:
-          name: spm_${{ inputs.spm-version }}.env
+          name: spm.env
 
       - name: Set version in env
         # Sets:
@@ -55,7 +55,7 @@ jobs:
         #   SPM_SHA
         #   SPM_DATE
         run: |
-          cat spm_${{ inputs.spm-version }}.env >> "$GITHUB_ENV"
+          cat spm.env >> "$GITHUB_ENV"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -69,6 +69,7 @@ jobs:
 
       - name: Create version-specific package
         if: inputs.main-package == true
+        # Main package: we update the version/sha
         run: |
           python scripts/spm_make_runtime.py \
             --matlab-version ${{ inputs.matlab-version }} \
@@ -78,11 +79,12 @@ jobs:
 
       - name: Create version-specific package
         if: inputs.main-package == false
+        # release-specific package
+        # this should be running after the main package has been created
+        # so we keep the version/sha unchanged
         run: |
           python scripts/spm_make_package.py \
-            --matlab-version ${{ inputs.matlab-version }} \
-            --spm-version ${VERSION} \
-            --spm-sha ${SPM_SHA}
+            --matlab-version ${{ inputs.matlab-version }}
 
       - name: Download CTF
         uses: actions/download-artifact@v4
@@ -90,9 +92,7 @@ jobs:
           name: spm_${{ inputs.spm-version }}_${{ inputs.matlab-version }}.ctf
 
       - name: Move CTF
-        run: |
-          mv spm_${{ inputs.matlab-version }}_${{ inputs.spm-version }}.ctf \
-             spm_runtime/_spm/_spm.ctf
+        run: mv spm.ctf spm_runtime/_spm/_spm.ctf
 
       - name: Push changes
         if: inputs.main-package == true
