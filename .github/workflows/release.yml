@@ -22,23 +22,26 @@ jobs:
 
   # --------------------------------------------------------------------
   guess-version:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Guess version
-      uses: ./.github/workflows/guess_version.yml
-      with:
-        spm-version: ${{ inputs.spm-version }}
+    uses: ./.github/workflows/guess_version.yml
+    with:
+      spm-version: ${{ inputs.spm-version }}
 
   # --------------------------------------------------------------------
   compile:
     needs: guess-version
-    runs-on: ubuntu-latest
-    steps:
-    - name: Compile
-      uses: ./.github/workflows/compile.yml
-      with:
-        spm-version: ${{ inputs.spm-version }}
-        matlab-version: ${{ inputs.matlab-version }}
+    uses: ./.github/workflows/compile.yml
+    with:
+      spm-version: ${{ inputs.spm-version }}
+      matlab-version: ${{ inputs.matlab-version }}
+
+  # --------------------------------------------------------------------
+  build:
+    needs: compile
+    uses: ./.github/workflows/build.yml
+    with:
+      spm-version: ${{ inputs.spm-version }}
+      matlab-version: ${{ inputs.matlab-version }}
+      main-package: true
 
   # --------------------------------------------------------------------
   publish-pypi:
@@ -57,12 +60,6 @@ jobs:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
 
     steps:
-    - name: Build
-      uses: ./.github/workflows/build.yml
-      with:
-        spm-version: ${{ inputs.spm-version }}
-        matlab-version: ${{ inputs.matlab-version }}
-        main-package: true
 
     - name: Download distribution
       uses: actions/download-artifact@v4
@@ -86,8 +83,6 @@ jobs:
       id-token: write  # IMPORTANT: mandatory for sigstore
 
     steps:
-    - name: Check out
-      uses: actions/checkout@v4
 
     - name: Download all the dists
       uses: actions/download-artifact@v4
