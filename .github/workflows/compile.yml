@@ -24,6 +24,9 @@ on:
         required: false
         default: 'R2024b'
         type: string
+    secrets:
+      MATLAB_BATCH_TOKEN:
+        required: true
 
 env:
   MLM_LICENSE_TOKEN: ${{ secrets.MATLAB_BATCH_TOKEN }}
