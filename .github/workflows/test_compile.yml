@@ -59,26 +59,13 @@ jobs:
           path: external/mpython
 
       - name: Set up MATLAB (legacy)
-        if: >
-          ${{(
-            inputs.matlab-version == 'R2020a' ||
-            inputs.matlab-version == 'R2020b' ||
-            inputs.matlab-version == 'R2022a' ||
-            inputs.matlab-version == 'R2022b'
-          )}}
+        if: inputs.matlab-version == 'R2020a' || inputs.matlab-version == 'R2020b'
         uses: matlab-actions/setup-matlab@v1
         with:
           release: ${{inputs.matlab-version}}
-          products: MATLAB_Compiler
 
       - name: Set up MATLAB
-        if: >
-          ${{(
-            inputs.matlab-version != 'R2020a' &&
-            inputs.matlab-version != 'R2020b' &&
-            inputs.matlab-version != 'R2022a' &&
-            inputs.matlab-version != 'R2022b'
-          )}}
+        if: inputs.matlab-version != 'R2020a' && inputs.matlab-version != 'R2020b'
         uses: matlab-actions/setup-matlab@v2
         with:
           release: ${{inputs.matlab-version}}
