@@ -1,0 +1,36 @@
+name: Test MATLAB Token
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  MLM_LICENSE_TOKEN: ${{ secrets.MATLAB_BATCH_TOKEN }}
+
+jobs:
+  verify-token:
+    name: Verify MATLAB License Token
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          products: MATLAB_Compiler
+          release: latest
+
+      - name: Save simple MATLAB file
+        run: |
+          echo "function y = sumTwoNumbers(x, z)
+          y = x + z;
+          end" > sumTwoNumbers.m
+
+      - name: Run simple MATLAB compilation
+        uses: matlab-actions/run-command@v2
+        with:
+          command: |
+            mcc -m sumTwoNumbers.m
