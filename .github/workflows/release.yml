@@ -130,6 +130,7 @@ jobs:
     - name: Create GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
+        MATLAB_VERSION: ${{ inputs.matlab-version }}
       run: |
         gh release create "$VERSION" --repo "$GITHUB_REPOSITORY" \
            --notes "SPM $SPM_VERSION ($SPM_SHA) compiled with MATLAB $MATLAB_VERSION"
