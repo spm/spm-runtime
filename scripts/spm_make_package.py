@@ -77,7 +77,7 @@ def _main():
                 continue
             key, val = line.split("=")
             key, val = key.strip(), val.strip()
-            input_metadata[key, val]
+            input_metadata[key] = val
 
     with open("spm_runtime/_version.py", "wt") as f:
         V = V or input_metadata["__version__"]
