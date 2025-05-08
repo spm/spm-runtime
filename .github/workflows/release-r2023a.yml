@@ -99,10 +99,10 @@ jobs:
         name: spm_${{ env.SPM_VERSION }}_${{ env.MATLAB_VERSION }}.dist
         path: dist/
 
-    # - name: Publish distribution 📦 to Test PyPI
-    #   uses: pypa/gh-action-pypi-publish@release/v1
-    #   with:
-    #     repository-url: https://test.pypi.org/legacy/
+    - name: Publish distribution 📦 to Test PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
 
   # --------------------------------------------------------------------
   publish-pypi:
@@ -126,5 +126,5 @@ jobs:
         name: spm_${{ env.SPM_VERSION }}_${{ env.MATLAB_VERSION }}.dist
         path: dist/
 
-    # - name: Publish distribution 📦 to PyPI
-    #   uses: pypa/gh-action-pypi-publish@release/v1
+    - name: Publish distribution 📦 to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
