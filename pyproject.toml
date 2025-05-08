@@ -1,5 +1,5 @@
 [project]
-name = "spm-runtime-R2024b"
+name = "spm-runtime"
 description = "Compiled SPM package that can be called from Python"
 readme = "README.md"
 classifiers = [ "Intended Audience :: Science/Research", "Operating System :: OS Independent", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12",]
@@ -7,13 +7,13 @@ license = "GPL-2.0"
 license-files = ["LICENSE"]
 requires-python = ">=3.9,<3.13"
 dependencies = [ "matlab-runtime",]
-version = "25.01.02"
+version = "25.01.02+dev"
 [[project.maintainers]]
 name = "Yael Balbastre"
 email = "y.balbastre@ucl.ac.uk"
 
 [build-system]
-requires = [ "setuptools >= 77.0", "wheel",]
+requires = ["setuptools >= 77.0", "wheel", "matlab_runtime"]
 build-backend = "setuptools.build_meta"
 
 [project.optional-dependencies]
@@ -26,8 +26,5 @@ Issues = "https://github.com/balbasty/spm-runtime/issues"
 [project.scripts]
 spm = "spm_runtime:_standalone_entrypoint"
 
-[tool.setuptools]
-packages = [ "spm_runtime",]
-
 [tool.setuptools.package-data]
-spm_runtime = [ "spm_runtime/_spm/_spm.ctf",]
+spm_runtime = [ "_spm/_spm.ctf",]
