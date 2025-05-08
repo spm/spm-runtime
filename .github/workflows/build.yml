@@ -81,12 +81,16 @@ jobs:
 
       - name: Create version-specific package
         if: inputs.main-package == false
-        # release-specific package
-        # this should be running after the main package has been created
-        # so we keep the version/sha unchanged
+        # Release-specific package
+        # This should be running after the main package has been created
+        # so we should be able to keep the version/sha unchanged.
+        # But I update them anyway as I had messed the push of the
+        # updated main package in the very first release.
         run: |
           python scripts/spm_make_package.py \
-            --matlab-version ${{ inputs.matlab-version }}
+            --matlab-version ${{ inputs.matlab-version }} \
+            --spm-version ${VERSION} \
+            --spm-sha ${SPM_SHA}
 
       - name: Download CTF
         uses: actions/download-artifact@v4
@@ -103,6 +107,7 @@ jobs:
           git config user.email github-actions@github.com
           git add pyproject.toml spm_runtime/_version.py
           git commit -m "[Release] ${VERSION}"
+          git push
           git tag ${VERSION}
           git push --tags
 
