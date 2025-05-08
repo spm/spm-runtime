@@ -71,7 +71,7 @@ jobs:
         if: inputs.main-package == true
         # Main package: we update the version/sha
         run: |
-          python scripts/spm_make_runtime.py \
+          python scripts/spm_make_package.py \
             --matlab-version ${{ inputs.matlab-version }} \
             --spm-version ${VERSION} \
             --spm-sha ${SPM_SHA} \
