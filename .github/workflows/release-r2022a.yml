@@ -46,6 +46,7 @@ jobs:
       spm-version: ${{ env.SPM_VERSION }}
       matlab-version: ${{ env.MATLAB_VERSION }}
       main-package: false
+    secrets: inherit
 
   # --------------------------------------------------------------------
   publish-test-pypi:

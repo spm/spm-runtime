@@ -42,6 +42,7 @@ jobs:
       spm-version: ${{ inputs.spm-version }}
       matlab-version: ${{ inputs.matlab-version }}
       main-package: true
+    secrets: inherit
 
   # --------------------------------------------------------------------
   publish-test-pypi:
