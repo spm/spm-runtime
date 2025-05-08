@@ -37,6 +37,8 @@ jobs:
     with:
       spm-version: ${{ env.SPM_VERSION }}
       matlab-version: ${{ env.MATLAB_VERSION }}
+    secrets:
+      MATLAB_BATCH_TOKEN: ${{ secrets.MATLAB_BATCH_TOKEN }}
 
   # --------------------------------------------------------------------
   build:
@@ -46,8 +48,6 @@ jobs:
       spm-version: ${{ env.SPM_VERSION }}
       matlab-version: ${{ env.MATLAB_VERSION }}
       main-package: false
-    secrets:
-      MATLAB_BATCH_TOKEN: ${{ secrets.MATLAB_BATCH_TOKEN }}
 
   # --------------------------------------------------------------------
   publish-test-pypi:
