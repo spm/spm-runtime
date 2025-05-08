@@ -2,7 +2,6 @@
 import os.path
 import shutil
 from setuptools import setup, Command
-from setuptools.command.build_py import build_py
 import setuptools.command.build
 
 setuptools.command.build.build.sub_commands.append(("build_ctf", None))
@@ -12,23 +11,7 @@ ROOT = os.path.dirname(__file__)
 CTF_PATH = os.path.join("spm_runtime", "_spm", "_spm.ctf")
 
 
-class my_build_by(build_py):
-
-    def run(self):
-        print("build_py.run()", os.path.abspath(os.path.curdir))
-        return super().run()
-
-    def find_data_files(self, package, src_dir):
-        print("package_data:", self.package_data)
-        out = super().find_data_files(package, src_dir)
-        print("find_data_files:", out)
-        return out
-
-
 class BuildCTF(Command):
-
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
 
     def initialize_options(self):
         self.build_lib = None
@@ -71,4 +54,4 @@ class BuildCTF(Command):
         ]
 
 
-setup(cmdclass={"build_ctf": BuildCTF, "build_py": my_build_by})
+setup(cmdclass={"build_ctf": BuildCTF})
