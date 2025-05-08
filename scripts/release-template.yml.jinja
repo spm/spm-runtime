@@ -3,7 +3,7 @@
 # Do not edit it directly! Instead edit the template `release-template.yml.jinja`
 # and re-generate the workflows using `make_release_workflow.py`.
 
-name: Release (R2024a)
+name: Release ({{{ matlab_release }}})
 description: Compile, Build, Publish on PyPI, Release on GitHub
 
 on:
@@ -13,7 +13,7 @@ on:
       - completed
 
 env:
-  MATLAB_VERSION: R2024a
+  MATLAB_VERSION: {{{ matlab_release }}}
   SPM_VERSION: ${{ github.event.workflow_run.name }}
 
 # ======================================================================

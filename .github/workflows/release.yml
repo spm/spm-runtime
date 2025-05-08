@@ -44,14 +44,11 @@ jobs:
       main-package: true
 
   # --------------------------------------------------------------------
-  publish-pypi:
+  publish-test-pypi:
     needs: build
     runs-on: ubuntu-latest
 
     environment:
-      # name: pypi
-      # url: https://pypi.org/p/spm-runtime
-
       name: testpypi
       url: https://test.pypi.org/p/spm-runtime
 
@@ -66,10 +63,33 @@ jobs:
         name: spm_${{ inputs.spm-version }}_${{ inputs.matlab-version }}.dist
         path: dist/
 
-    # - name: Publish distribution 📦 to PyPI
+    # - name: Publish distribution 📦 to Test PyPI
     #   uses: pypa/gh-action-pypi-publish@release/v1
     #   with:
     #     repository-url: https://test.pypi.org/legacy/
+
+  # --------------------------------------------------------------------
+  publish-pypi:
+    needs: publish-test-pypi
+    runs-on: ubuntu-latest
+
+    environment:
+      name: pypi
+      url: https://pypi.org/p/spm-runtime
+
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+
+    - name: Download distribution
+      uses: actions/download-artifact@v4
+      with:
+        name: spm_${{ inputs.spm-version }}_${{ inputs.matlab-version }}.dist
+        path: dist/
+
+    # - name: Publish distribution 📦 to PyPI
+    #   uses: pypa/gh-action-pypi-publish@release/v1
 
   # --------------------------------------------------------------------
   github-release:
@@ -98,8 +118,11 @@ jobs:
     - name: Create GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
+        SPM_VERSION: ${{ inputs.spm-version }}
+        MATLAB_VERSION: ${{ inputs.matlab-version }}
       run: |
-        gh release create "$VERSION" --repo "$GITHUB_REPOSITORY" --notes ""
+        gh release create "$VERSION" --repo "$GITHUB_REPOSITORY" \
+           --notes "SPM $SPM_VERSION compiled with MATLAB $MATLAB_VERSION"
 
     - name: Upload artifact signatures to GitHub Release
       env:
