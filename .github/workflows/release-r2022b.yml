@@ -11,47 +11,73 @@ on:
     workflows: [Release]
     types:
       - completed
-
-env:
-  MATLAB_VERSION: R2022b
-  SPM_VERSION: ${{ github.event.workflow_run.name }}
+  workflow_dispatch:
+    inputs:
+      spm-version:
+        description: 'SPM Commit / Branch / Tag / SHA to checkout'
+        required: false
+        default: ''
 
 # ======================================================================
 
 jobs:
 
   # --------------------------------------------------------------------
-  guess-version:
-    # This workflow is always triggered when the "Release" workflow completes,
-    # even if it failed. This barrier job is triggered only if it succeeded.
+  spm-version-from-run:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    outputs:
+      value: ${{ github.event.workflow_run.name }}
+    steps:
+      - run: true
+    runs-on: ubuntu-latest
+
+  spm-version-from-dispatch:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    outputs:
+      value: ${{ inputs.spm-version }}
+    steps:
+      - run: true
+    runs-on: ubuntu-latest
+
+  spm-version:
+    needs: [spm-version-from-run, spm-version-from-dispatch]
+    if: always() && contains(needs.*.result, 'success') && !contains(needs.*.result, 'failure')
+    outputs:
+      value: ${{ join(needs.*.outputs.value, '') }}
+    steps:
+      - run: true
+    runs-on: ubuntu-latest
+
+  # --------------------------------------------------------------------
+  guess-version:
+    needs: spm-version
     uses: ./.github/workflows/guess_version.yml
     with:
-      spm-version: ${{ github.event.workflow_run.name }}
+      spm-version: ${{ needs.spm-version.outputs.value }}
       increase-post: false
 
   # --------------------------------------------------------------------
   compile:
-    needs: guess-version
+    needs: [guess-version, spm-version]
     uses: ./.github/workflows/compile.yml
     with:
-      spm-version: ${{ github.event.workflow_run.name }}
+      spm-version: ${{ needs.spm-version.outputs.value }}
       matlab-version: R2022b
     secrets:
       MATLAB_BATCH_TOKEN: ${{ secrets.MATLAB_BATCH_TOKEN }}
 
   # --------------------------------------------------------------------
   build:
-    needs: compile
+    needs: [compile, spm-version]
     uses: ./.github/workflows/build.yml
     with:
-      spm-version: ${{ github.event.workflow_run.name }}
+      spm-version: ${{ needs.spm-version.outputs.value }}
       matlab-version: R2022b
       main-package: false
 
   # --------------------------------------------------------------------
   publish-test-pypi:
-    needs: build
+    needs: [build, spm-version]
     runs-on: ubuntu-latest
 
     environment:
@@ -64,18 +90,21 @@ jobs:
     steps:
     - name: Download distribution
       uses: actions/download-artifact@v4
+      env:
+        SPM_VERSION: ${{ needs.spm-version.outputs.value }}
+        MATLAB_VERSION: R2022b
       with:
         name: spm_${{ env.SPM_VERSION }}_${{ env.MATLAB_VERSION }}.dist
         path: dist/
 
-    # - name: Publish distribution 📦 to PyPI
+    # - name: Publish distribution 📦 to Test PyPI
     #   uses: pypa/gh-action-pypi-publish@release/v1
     #   with:
     #     repository-url: https://test.pypi.org/legacy/
 
   # --------------------------------------------------------------------
   publish-pypi:
-    needs: publish-test-pypi
+    needs: [publish-test-pypi, spm-version]
     runs-on: ubuntu-latest
 
     environment:
@@ -88,6 +117,9 @@ jobs:
     steps:
     - name: Download distribution
       uses: actions/download-artifact@v4
+      env:
+        SPM_VERSION: ${{ needs.spm-version.outputs.value }}
+        MATLAB_VERSION: R2022b
       with:
         name: spm_${{ env.SPM_VERSION }}_${{ env.MATLAB_VERSION }}.dist
         path: dist/
