@@ -25,7 +25,7 @@ jobs:
   # --------------------------------------------------------------------
   spm-version:
     outputs:
-      value: ${{ join(steps.*.output.value, '') }}
+      value: ${{ join(steps.*.outputs.value, '') }}
     runs-on: ubuntu-latest
     steps:
       - id: if-run
