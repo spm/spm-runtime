@@ -41,12 +41,19 @@ jobs:
 
   spm-version:
     needs: [spm-version-from-run, spm-version-from-dispatch]
-    if: always() && contains(needs.*.result, 'success') && !contains(needs.*.result, 'failure')
+    if: always() && contains(needs.*.result, 'success')
     outputs:
       value: ${{ join(needs.*.outputs.value, '') }}
     steps:
       - run: true
     runs-on: ubuntu-latest
+
+  print-spm-version:
+    needs: spm-version
+    runs-on: ubuntu-latest
+    steps:
+    - name: "spm-version: ${{ needs.spm-version.outputs.value }}"
+      run: true
 
   # --------------------------------------------------------------------
   guess-version:
