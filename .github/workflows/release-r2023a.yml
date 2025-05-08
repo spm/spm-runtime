@@ -27,7 +27,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     uses: ./.github/workflows/guess_version.yml
     with:
-      spm-version: ${{ env.SPM_VERSION }}
+      spm-version: ${{ github.event.workflow_run.name }}
       increase-post: false
 
   # --------------------------------------------------------------------
@@ -35,8 +35,8 @@ jobs:
     needs: guess-version
     uses: ./.github/workflows/compile.yml
     with:
-      spm-version: ${{ env.SPM_VERSION }}
-      matlab-version: ${{ env.MATLAB_VERSION }}
+      spm-version: ${{ github.event.workflow_run.name }}
+      matlab-version: R2023a
     secrets:
       MATLAB_BATCH_TOKEN: ${{ secrets.MATLAB_BATCH_TOKEN }}
 
@@ -45,8 +45,8 @@ jobs:
     needs: compile
     uses: ./.github/workflows/build.yml
     with:
-      spm-version: ${{ env.SPM_VERSION }}
-      matlab-version: ${{ env.MATLAB_VERSION }}
+      spm-version: ${{ github.event.workflow_run.name }}
+      matlab-version: R2023a
       main-package: false
 
   # --------------------------------------------------------------------
