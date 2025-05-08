@@ -75,7 +75,7 @@ def _main():
         for line in f:
             if not line.strip():
                 continue
-            key, val = f.split("=")
+            key, val = line.split("=")
             key, val = key.strip(), val.strip()
             input_metadata[key, val]
 
