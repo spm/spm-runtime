@@ -3,6 +3,8 @@ name = "spm-runtime-R2024b"
 description = "Compiled SPM package that can be called from Python"
 readme = "README.md"
 classifiers = [ "Intended Audience :: Science/Research", "License :: OSI Approved :: GNU General Public License v2 (GPLv2)", "Operating System :: OS Independent", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12",]
+license = "GPL-2.0"
+license-files = ["LICENSE"]
 requires-python = ">=3.9,<3.13"
 dependencies = [ "matlab-runtime",]
 version = "25.01.02"
@@ -11,11 +13,8 @@ name = "Yael Balbastre"
 email = "y.balbastre@ucl.ac.uk"
 
 [build-system]
-requires = [ "setuptools >= 61.0", "wheel",]
+requires = [ "setuptools >= 77.0", "wheel",]
 build-backend = "setuptools.build_meta"
-
-[project.license]
-file = "LICENSE"
 
 [project.optional-dependencies]
 test = [ "pytest",]
