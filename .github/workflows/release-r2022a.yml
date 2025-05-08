@@ -23,32 +23,25 @@ on:
 jobs:
 
   # --------------------------------------------------------------------
-  spm-version-from-run:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    outputs:
-      value: ${{ github.event.workflow_run.name }}
-    steps:
-      - run: true
-    runs-on: ubuntu-latest
-
-  spm-version-from-dispatch:
-    if: ${{ github.event_name == 'workflow_dispatch' }}
-    outputs:
-      value: ${{ inputs.spm-version }}
-    steps:
-      - run: true
-    runs-on: ubuntu-latest
-
   spm-version:
-    needs: [spm-version-from-run, spm-version-from-dispatch]
-    if: always() && contains(needs.*.result, 'success')
     outputs:
-      value: ${{ join(needs.*.outputs.value, '') }}
-    steps:
-      - run: echo "$SPM_VERSION"
-        env:
-          SPM_VERSION: ${{ join(needs.*.outputs.value, '') }}
+      value: ${{ join(steps.*.output.value, '') }}
     runs-on: ubuntu-latest
+    steps:
+      - id: if-run
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        run: |
+          echo "$SPM_VERSION"
+          echo "value=$SPM_VERSION" >> "$GITHUB_OUTPUT"
+        env:
+          SPM_VERSION: ${{ github.event.workflow_run.name }}
+      - id: if-dispatch
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          echo "$SPM_VERSION"
+          echo "value=$SPM_VERSION" >> "$GITHUB_OUTPUT"
+        env:
+          SPM_VERSION: ${{ inputs.spm-version }}
 
   print-spm-version:
     needs: spm-version
