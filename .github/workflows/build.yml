@@ -63,9 +63,9 @@ jobs:
       - name: Check out spm-runtime
         uses: actions/checkout@v4
 
-      - name: Install matlab-runtime
+      - name: Install dependencies for running script
         run: |
-          python -m pip install --upgrade pip matlab-runtime
+          python -m pip install --upgrade pip matlab-runtime toml
 
       - name: Create version-specific package
         if: inputs.main-package == true
