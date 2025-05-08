@@ -33,6 +33,8 @@ jobs:
     with:
       spm-version: ${{ inputs.spm-version }}
       matlab-version: ${{ inputs.matlab-version }}
+    secrets:
+      MATLAB_BATCH_TOKEN: ${{ secrets.MATLAB_BATCH_TOKEN }}
 
   # --------------------------------------------------------------------
   build:
@@ -44,14 +46,11 @@ jobs:
       main-package: true
 
   # --------------------------------------------------------------------
-  publish-pypi:
+  publish-test-pypi:
     needs: build
     runs-on: ubuntu-latest
 
     environment:
-      # name: pypi
-      # url: https://pypi.org/p/spm-runtime
-
       name: testpypi
       url: https://test.pypi.org/p/spm-runtime
 
@@ -66,10 +65,33 @@ jobs:
         name: spm_${{ inputs.spm-version }}_${{ inputs.matlab-version }}.dist
         path: dist/
 
-    # - name: Publish distribution 📦 to PyPI
+    # - name: Publish distribution 📦 to Test PyPI
     #   uses: pypa/gh-action-pypi-publish@release/v1
     #   with:
     #     repository-url: https://test.pypi.org/legacy/
+
+  # --------------------------------------------------------------------
+  publish-pypi:
+    needs: publish-test-pypi
+    runs-on: ubuntu-latest
+
+    environment:
+      name: pypi
+      url: https://pypi.org/p/spm-runtime
+
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+
+    - name: Download distribution
+      uses: actions/download-artifact@v4
+      with:
+        name: spm_${{ inputs.spm-version }}_${{ inputs.matlab-version }}.dist
+        path: dist/
+
+    # - name: Publish distribution 📦 to PyPI
+    #   uses: pypa/gh-action-pypi-publish@release/v1
 
   # --------------------------------------------------------------------
   github-release:
@@ -81,6 +103,16 @@ jobs:
       id-token: write  # IMPORTANT: mandatory for sigstore
 
     steps:
+
+    - name: Retrieve version
+      uses: actions/download-artifact@v4
+      with:
+        name: spm_${{ inputs.spm-version }}.env
+
+    - name: Set version in env
+      # Sets [VERSION, SPM_VERSION, SPM_SHA, SPM_DATE]
+      run: |
+        cat spm.env >> "$GITHUB_ENV"
 
     - name: Download all the dists
       uses: actions/download-artifact@v4
@@ -99,7 +131,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
-        gh release create "$VERSION" --repo "$GITHUB_REPOSITORY" --notes ""
+        gh release create "$VERSION" --repo "$GITHUB_REPOSITORY" \
+           --notes "SPM $SPM_VERSION ($SPM_SHA) compiled with MATLAB $MATLAB_VERSION"
 
     - name: Upload artifact signatures to GitHub Release
       env:

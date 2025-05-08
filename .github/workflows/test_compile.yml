@@ -10,7 +10,7 @@ on:
       matlab-version:
         description: 'MATLAB release'
         required: false
-        default: 'R2024b'
+        default: 'latest'
 
 env:
   MLM_LICENSE_TOKEN: ${{ secrets.MATLAB_BATCH_TOKEN }}
@@ -58,14 +58,14 @@ jobs:
           fetch-depth: 0
           path: external/mpython
 
-      - name: Set up MATLAB (legacy)
-        if: inputs.matlab-version == 'R2020a' || inputs.matlab-version == 'R2020b'
-        uses: matlab-actions/setup-matlab@v1
-        with:
-          release: ${{inputs.matlab-version}}
+      - name: Set up MATLAB error
+        if: inputs.matlab-version < 'R2020b'
+        run: |
+          echo "This action only supports MATLAB >= R2020b"
+          exit 1
 
       - name: Set up MATLAB
-        if: inputs.matlab-version != 'R2020a' && inputs.matlab-version != 'R2020b'
+        if: inputs.matlab-version >= 'R2020b'
         uses: matlab-actions/setup-matlab@v2
         with:
           release: ${{inputs.matlab-version}}

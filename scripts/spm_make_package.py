@@ -75,9 +75,9 @@ def _main():
         for line in f:
             if not line.strip():
                 continue
-            key, val = f.split("=")
+            key, val = line.split("=")
             key, val = key.strip(), val.strip()
-            input_metadata[key, val]
+            input_metadata[key] = val
 
     with open("spm_runtime/_version.py", "wt") as f:
         V = V or input_metadata["__version__"]
