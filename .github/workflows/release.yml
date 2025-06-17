@@ -14,7 +14,7 @@ on:
       matlab-version:
         description: 'MATLAB release'
         required: false
-        default: 'R2024b'
+        default: 'R2025a'
 
 # ======================================================================
 

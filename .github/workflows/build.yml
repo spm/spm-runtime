@@ -11,7 +11,7 @@ on:
       matlab-version:
         description: 'MATLAB release'
         required: false
-        default: 'R2024b'
+        default: 'R2025a'
         type: string
       main-package:
         description: 'Build main package (no matlab tag)'
@@ -29,7 +29,7 @@ on:
       matlab-version:
         description: 'MATLAB release'
         required: false
-        default: 'R2024b'
+        default: 'R2025a'
         type: string
       main-package:
         description: 'Build main package (no matlab tag)'
