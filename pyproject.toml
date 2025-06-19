@@ -6,7 +6,7 @@ classifiers = [ "Intended Audience :: Science/Research", "Operating System :: OS
 license = "GPL-2.0"
 license-files = ["LICENSE"]
 requires-python = ">=3.9,<3.13"
-dependencies = [ "matlab-runtime",]
+dependencies = [ "matlab-runtime>=0.0.4",]
 version = "25.01.02+dev"
 [[project.maintainers]]
 name = "Yael Balbastre"
