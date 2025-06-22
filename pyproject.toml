@@ -7,7 +7,7 @@ license = "GPL-2.0"
 license-files = [ "LICENSE",]
 requires-python = ">=3.9,<3.13"
 dependencies = [ "matlab-runtime>=0.0.4",]
-version = "25.01.01"
+version = "25.01.02"
 [[project.maintainers]]
 name = "Yael Balbastre"
 email = "y.balbastre@ucl.ac.uk"
