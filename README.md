@@ -33,8 +33,10 @@ MATLAB runtime, you can choose to install a package specifically compiled
 against another MATLAB runtime. The python versions supported by each
 MATLAB runtime is provided in the table below:
 
-| MATLAB | Python     |
+| MATLAB | Python      |
 | ------ | ---------- |
+| R2025b | 3.10 - 3.12 |
+| R2025a | 3.9 - 3.12 |
 | R2024b | 3.9 - 3.12 |
 | R2024a | 3.9 - 3.11 |
 | R2023b | 3.9 - 3.11 |
