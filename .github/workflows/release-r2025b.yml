@@ -3,7 +3,7 @@
 # Do not edit it directly! Instead edit the template `release-template.yml.jinja`
 # and re-generate the workflows using `make_release_workflow.py`.
 
-name: Release (R2022a)
+name: Release (R2025b)
 description: Compile, Build, Publish on PyPI, Release on GitHub
 
 on:
@@ -64,7 +64,7 @@ jobs:
     uses: ./.github/workflows/compile.yml
     with:
       spm-version: ${{ needs.spm-version.outputs.value }}
-      matlab-version: R2022a
+      matlab-version: R2025b
     secrets:
       MATLAB_BATCH_TOKEN: ${{ secrets.MATLAB_BATCH_TOKEN }}
 
@@ -74,7 +74,7 @@ jobs:
     uses: ./.github/workflows/build.yml
     with:
       spm-version: ${{ needs.spm-version.outputs.value }}
-      matlab-version: R2022a
+      matlab-version: R2025b
       main-package: false
 
   # --------------------------------------------------------------------
@@ -84,7 +84,7 @@ jobs:
 
     environment:
       name: testpypi
-      url: https://test.pypi.org/p/spm-runtime-R2022a
+      url: https://test.pypi.org/p/spm-runtime-R2025b
 
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
@@ -94,7 +94,7 @@ jobs:
       uses: actions/download-artifact@v4
       env:
         SPM_VERSION: ${{ needs.spm-version.outputs.value }}
-        MATLAB_VERSION: R2022a
+        MATLAB_VERSION: R2025b
       with:
         name: spm_${{ env.SPM_VERSION }}_${{ env.MATLAB_VERSION }}.dist
         path: dist/
@@ -111,7 +111,7 @@ jobs:
 
     environment:
       name: pypi
-      url: https://pypi.org/p/spm-runtime-R2022a
+      url: https://pypi.org/p/spm-runtime-R2025b
 
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing
@@ -121,7 +121,7 @@ jobs:
       uses: actions/download-artifact@v4
       env:
         SPM_VERSION: ${{ needs.spm-version.outputs.value }}
-        MATLAB_VERSION: R2022a
+        MATLAB_VERSION: R2025b
       with:
         name: spm_${{ env.SPM_VERSION }}_${{ env.MATLAB_VERSION }}.dist
         path: dist/

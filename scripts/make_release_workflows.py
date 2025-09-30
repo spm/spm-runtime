@@ -12,6 +12,7 @@ MATLAB_VERSIONS = [
     "R2024a",
     "R2024b",
     "R2025a",
+    "R2025b",
 ]
 
 jinja_env = jinja2.Environment(
