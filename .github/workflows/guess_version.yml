@@ -111,9 +111,16 @@ jobs:
           POST_VAL=0
           EXISTS=false
           for RUNTIME_VERSION in "${RUNTIME_VERSIONS[@]}"; do
-            # Match vanilla version 
-            if [[ "$RUNTIME_VERSION" =~ "${SPM_VERSION}" ]]
+            # Match version with POST_KEY 
+            if [[ "$RUNTIME_VERSION" =~ "${SPM_VERSION}${POST_KEY}" ]]
             then
+              echo "Matched $RUNTIME_VERSION with ${SPM_VERSION}${POST_KEY}" 
+              EXISTS=true
+            fi
+            # Exact version match
+            if [[ "$RUNTIME_VERSION" == "${SPM_VERSION}" ]]
+            then
+              echo "Matched $RUNTIME_VERSION with ${SPM_VERSION}" 
               EXISTS=true
             fi
             # Match against SPM_VERSION.POST_KEYxx
