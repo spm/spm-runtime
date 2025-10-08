@@ -38,6 +38,7 @@ jobs:
     with:
       spm-version: ${{ inputs.spm-version }}
       matlab-version: ${{ inputs.matlab-version }}
+      increase-post: ${{ inputs.increase-post }}
     secrets:
       MATLAB_BATCH_TOKEN: ${{ secrets.MATLAB_BATCH_TOKEN }}
 
