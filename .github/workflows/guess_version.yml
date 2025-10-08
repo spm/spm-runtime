@@ -99,37 +99,35 @@ jobs:
             SPM_VERSION="$SPM_VERSION_CURRENT"
             POST_KEY=".post"
           fi
-
+          
           cd ../spm-runtime
-
-          # Read all spm-runtime tags
-          IFS=$'\n' read -r -d '' -a RUNTIME_VERSIONS < <( git tag && printf '\0' )
-
+          
+          # Read all spm-runtime tags cleanly
+          RUNTIME_VERSIONS=()
+          while IFS= read -r tag; do
+              [[ -z "$tag" ]] && continue
+              tag="${tag//$'\r'/}"
+              RUNTIME_VERSIONS+=("$tag")
+          done < <(git tag)
+          
           cd ..
-
-          # Compute post/dev increment
+          
           POST_VAL=0
           EXISTS=false
+          
           for RUNTIME_VERSION in "${RUNTIME_VERSIONS[@]}"; do
-            # Match version with POST_KEY 
-            if [[ "$RUNTIME_VERSION" =~ "${SPM_VERSION}${POST_KEY}" ]]
-            then
-              echo "Matched $RUNTIME_VERSION with ${SPM_VERSION}${POST_KEY}" 
-              EXISTS=true
-            fi
-            # Exact version match
-            if [[ "$RUNTIME_VERSION" == "${SPM_VERSION}" ]]
-            then
-              echo "Matched $RUNTIME_VERSION with ${SPM_VERSION}" 
-              EXISTS=true
-            fi
-            # Match against SPM_VERSION.POST_KEYxx
-            if [[ "$RUNTIME_VERSION" =~ "${SPM_VERSION}${POST_KEY}(\d+)" ]]
-            then
-              if (( ${BASH_REMATCH[1]} -gt ${POST_VAL} )); then
-                POST_VAL=${BASH_REMATCH[1]}
+              # Trim both sides
+              RUNTIME_VERSION="$(echo -n "$RUNTIME_VERSION" | tr -d '\r\n')"
+              SPM_VERSION="$(echo -n "$SPM_VERSION" | tr -d '\r\n')"
+          
+              if [[ "$RUNTIME_VERSION" == "$SPM_VERSION" ]]; then
+                  echo "Matched exact tag: $RUNTIME_VERSION"
+                  EXISTS=true
+              elif [[ "$RUNTIME_VERSION" =~ ^${SPM_VERSION}${POST_KEY}([0-9]*)$ ]]; then
+                  echo "Matched variant: $RUNTIME_VERSION"
+                  EXISTS=true
+                  (( ${BASH_REMATCH[1]} > POST_VAL )) && POST_VAL=${BASH_REMATCH[1]}
               fi
-            fi
           done
 
           if [ ${EXISTS} = true ]; then
