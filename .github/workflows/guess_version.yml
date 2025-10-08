@@ -17,6 +17,11 @@ on:
         description: 'SPM Commit / Branch / Tag / SHA to checkout'
         required: false
         default: 'main'
+      increase-post:
+        description: 'Whether to increase the post release (only if main)'
+        required: false
+        default: false
+        type: boolean
 
   workflow_call:
     inputs:
