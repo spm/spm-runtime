@@ -99,6 +99,8 @@ jobs:
             SPM_VERSION="$SPM_VERSION_CURRENT"
             POST_KEY=".post"
           fi
+
+          echo "::notice::Checking for Runtime versions for ${SPM_VERSION}"
           
           cd ../spm-runtime
           
@@ -119,20 +121,24 @@ jobs:
               # Trim both sides
               RUNTIME_VERSION="$(echo -n "$RUNTIME_VERSION" | tr -d '\r\n')"
               SPM_VERSION="$(echo -n "$SPM_VERSION" | tr -d '\r\n')"
+              
           
               if [[ "$RUNTIME_VERSION" == "$SPM_VERSION" ]]; then
-                  echo "Matched exact tag: $RUNTIME_VERSION"
+                  echo "::notice::Matched exact tag: $RUNTIME_VERSION"
                   EXISTS=true
               elif [[ "$RUNTIME_VERSION" =~ ^${SPM_VERSION}${POST_KEY}([0-9]*)$ ]]; then
-                  echo "Matched variant: $RUNTIME_VERSION"
+                  echo "::notice::Matched variant: $RUNTIME_VERSION"
                   EXISTS=true
                   (( ${BASH_REMATCH[1]} > POST_VAL )) && POST_VAL=${BASH_REMATCH[1]}
+              else 
+                  echo "::notice::$RUNTIME_VERSION not matching $SPM_VERSION"
               fi
           done
 
           if [ ${EXISTS} = true ]; then
             if [[ "$INCREASE" == "true" ]]; then
               POST_VAL=$(( ${POST_VAL} + 1 ))
+              echo "::notice::Increasing variant number to ${POST_KEY}${POST_VAL}"
             fi
             RUNTIME_VERSION="${SPM_VERSION}${POST_KEY}${POST_VAL}"
           elif [[ "$POST_KEY" == ".dev" ]]; then
