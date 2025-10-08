@@ -106,10 +106,12 @@ jobs:
           POST_VAL=0
           EXISTS=false
           for RUNTIME_VERSION in "${RUNTIME_VERSIONS[@]}"; do
+            # Match vanilla version 
             if [[ "$RUNTIME_VERSION" =~ "${SPM_VERSION}${POST_KEY}" ]]
             then
               EXISTS=true
             fi
+            # Match against SPM_VERSION.POST_KEYxx
             if [[ "$RUNTIME_VERSION" =~ "${SPM_VERSION}${POST_KEY}(\d+)" ]]
             then
               if (( ${BASH_REMATCH[1]} -gt ${POST_VAL} )); then
