@@ -112,7 +112,7 @@ jobs:
           EXISTS=false
           for RUNTIME_VERSION in "${RUNTIME_VERSIONS[@]}"; do
             # Match vanilla version 
-            if [[ "$RUNTIME_VERSION" =~ "${SPM_VERSION}${POST_KEY}" ]]
+            if [[ "$RUNTIME_VERSION" =~ "${SPM_VERSION}" ]]
             then
               EXISTS=true
             fi
