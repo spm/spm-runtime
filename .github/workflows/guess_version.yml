@@ -53,6 +53,7 @@ jobs:
         uses: actions/checkout@v4
         # I need the entire depth to query tags
         with:
+          fetch-depth: 0
           path: spm-runtime
 
       - name: Compute tag
