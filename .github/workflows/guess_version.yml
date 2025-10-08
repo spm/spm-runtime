@@ -111,6 +111,9 @@ jobs:
               tag="${tag//$'\r'/}"
               RUNTIME_VERSIONS+=("$tag")
           done < <(git tag)
+
+          echo "::notice::Found ${#RUNTIME_VERSIONS[@]} runtime tags"
+          printf '::notice:: - %s\n' "${RUNTIME_VERSIONS[@]}"
           
           cd ..
           
