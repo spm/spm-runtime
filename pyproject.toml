@@ -2,10 +2,10 @@
 name = "spm-runtime"
 description = "Compiled SPM package that can be called from Python"
 readme = "README.md"
-classifiers = [ "Intended Audience :: Science/Research", "Operating System :: OS Independent", "Programming Language :: Python :: 3.9", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12",]
+classifiers = [ "Intended Audience :: Science/Research", "Operating System :: OS Independent", "Programming Language :: Python :: 3.10", "Programming Language :: Python :: 3.11", "Programming Language :: Python :: 3.12", "Programming Language :: Python :: 3.13",]
 license = "GPL-2.0"
 license-files = [ "LICENSE",]
-requires-python = ">=3.9,<3.13"
+requires-python = ">=3.10,<3.14"
 dependencies = [ "matlab-runtime>=0.0.4",]
 version = "25.01.02"
 [[project.maintainers]]
