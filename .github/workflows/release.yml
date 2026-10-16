@@ -14,7 +14,7 @@ on:
       matlab-version:
         description: 'MATLAB release'
         required: false
-        default: 'R2025a'
+        default: 'R2026b'
       increase-post:
         description: 'Whether to increase the post release (use for minor updates)'
         required: false
