@@ -35,7 +35,7 @@ MATLAB runtime is provided in the table below:
 
 | MATLAB | Python      |
 | ------ | ----------- |
-| R2026a | 3.10 - 3.14 | 
+| R2026b | 3.10 - 3.14 | 
 | R2026a | 3.9 - 3.13  | 
 | R2025b | 3.9 - 3.13  |
 | R2025a | 3.9 - 3.12  |
