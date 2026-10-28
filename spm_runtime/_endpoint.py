@@ -9,11 +9,13 @@ class _Endpoint:
         self._deployed = None
 
     def _init_endpoint(self):
-        import matlab_runtime
-        from ._version import __matlab_release__
+        from matlab_runtime import import_deployed
         from . import _spm
-        matlab_runtime.init(__matlab_release__, install_if_missing=True)
-        self._deployed = matlab_runtime.import_deployed(_spm)
+        self._deployed = import_deployed(
+            _spm,
+            install_if_missing=True,
+            only_needed_products=True,
+        )
 
     def __call__(self, *args, **kwargs):
         if self._deployed is None:
