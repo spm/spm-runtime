@@ -92,7 +92,7 @@ def guess_version(spm_version=None):
     }
 
 
-def compile(spm_version=None, matlab_release="R2024b", odir="."):
+def compile(spm_version=None, matlab_release=None, odir="."):
 
     input_spm_version = spm_version
 
@@ -105,10 +105,11 @@ def compile(spm_version=None, matlab_release="R2024b", odir="."):
     odir = os.path.abspath(odir)
 
     current_release = guess_matlab_release(shutil.which("matlab"))
+    matlab_release = matlab_release or current_release
     if current_release != matlab_release:
         raise RuntimeError(
-            f"matlab on path is not {matlab_release} "
-            f"but {current_release}"
+            f"Cannot compile CTF for MATLAB {matlab_release} with"
+            f"MATLAB {current_release} (which is the version on the path)"
         )
 
     with tempfile.TemporaryDirectory() as tmpdir:
