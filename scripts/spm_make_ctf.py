@@ -107,8 +107,8 @@ def compile(spm_version=None, matlab_release="R2024b", odir="."):
     current_release = guess_matlab_release(shutil.which("matlab"))
     if current_release != matlab_release:
         raise RuntimeError(
-            "matlab on path is not", matlab_release,
-            "but", current_release
+            f"matlab on path is not {matlab_release} "
+            f"but {current_release}"
         )
 
     with tempfile.TemporaryDirectory() as tmpdir:
