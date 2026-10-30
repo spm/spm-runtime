@@ -15,6 +15,7 @@ class _Endpoint:
             _spm,
             install_if_missing=True,
             only_needed_products=True,
+            default_scope="user",
         )
 
     def __call__(self, *args, **kwargs):
