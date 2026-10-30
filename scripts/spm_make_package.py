@@ -1,4 +1,5 @@
 import argparse
+import os.path
 import toml
 from matlab_runtime.utils import SUPPORTED_PYTHON_VERSIONS
 
@@ -70,7 +71,19 @@ def _main():
         toml.dump(pyproject, f)
 
     # Fix _version.py
-    with open("spm_runtime/_version.py", "rt") as f:
+    fix_version(spm_version=V, spm_sha=S, matlab_release=R)
+
+
+def fix_version(odir=".", **versions):
+    # Fix _version.py
+
+    fname = os.path.join(odir, "spm_runtime", "_version.py")
+
+    V = versions.get("spm_version")
+    S = versions.get("spm_sha")
+    R = versions.get("matlab_release")
+    
+    with open(fname, "rt") as f:
         input_metadata = {}
         for line in f:
             if not line.strip():
@@ -79,13 +92,13 @@ def _main():
             key, val = key.strip(), val.strip()
             input_metadata[key] = val
 
-    with open("spm_runtime/_version.py", "wt") as f:
-        V = V or input_metadata["__version__"]
+    with open(fname, "wt") as f:
+        V = V or input_metadata.get("__version__", "0.0.0+unknown")
         S = S or input_metadata.get("__spm_sha__", None)
-        lines = [
-            f'__version__ = "{V}"',
-            f'__matlab_release__ = "{R}"',
-        ]
+        R = R or input_metadata.get("__matlab_release__", None)
+        lines = [f'__version__ = "{V}"']
+        if R:
+            lines += [f'__matlab_release__ = "{R}"']
         if S:
             lines += [f'__spm_sha__ = "{S}"']
         f.write("\n".join(lines) + "\n")
