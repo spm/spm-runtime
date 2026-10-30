@@ -52,6 +52,7 @@ class BuildCTF(Command):
         return [
             os.path.join("spm_runtime", "_version.py"),
             os.path.join("scripts", "spm_make_ctf.py"),
+            os.path.join("scripts", "spm_make_package.py"),
             os.path.join("scripts", "spm_make_python.m"),
         ]
 
