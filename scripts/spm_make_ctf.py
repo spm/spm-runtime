@@ -92,7 +92,7 @@ def guess_version(spm_version=None):
     }
 
 
-def compile(spm_version=None, matlab_release="R2024b", odir="."):
+def compile(spm_version=None, matlab_release=None, odir="."):
 
     input_spm_version = spm_version
 
@@ -105,11 +105,13 @@ def compile(spm_version=None, matlab_release="R2024b", odir="."):
     odir = os.path.abspath(odir)
 
     current_release = guess_matlab_release(shutil.which("matlab"))
+    matlab_release = matlab_release or current_release
     if current_release != matlab_release:
         raise RuntimeError(
-            "matlab on path is not", matlab_release,
-            "but", current_release
+            f"Cannot compile CTF for MATLAB {matlab_release} with"
+            f"MATLAB {current_release} (which is the version on the path)"
         )
+    versions["matlab_release"] = matlab_release
 
     with tempfile.TemporaryDirectory() as tmpdir:
 
@@ -173,13 +175,13 @@ def compile(spm_version=None, matlab_release="R2024b", odir="."):
         )
 
     os.chdir(cwd)
-    return os.path.join(odir, ctf_name)
+    return os.path.join(odir, ctf_name), versions
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--spm-version", default=None)
-    parser.add_argument("-r", "--matlab-runtime", default="R2024b")
+    parser.add_argument("-r", "--matlab-runtime", default=None)
     parser.add_argument("-o", "--output", default=".")
     p = parser.parse_args()
     compile(p.spm_version, p.matlab_runtime, p.output)

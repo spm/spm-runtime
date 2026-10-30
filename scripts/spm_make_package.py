@@ -1,5 +1,5 @@
 import argparse
-import toml
+import os.path
 from matlab_runtime.utils import SUPPORTED_PYTHON_VERSIONS
 
 
@@ -10,6 +10,82 @@ def _make_parser():
     p.add_argument("--spm-sha")
     p.add_argument("--main-package", action='store_true')
     return p
+
+def _main():
+    p = _make_parser().parse_args()
+    R = p.matlab_version
+    V = p.spm_version
+    S = p.spm_sha
+
+    # Fix pyproject.toml
+    fix_pyproject(spm_version=V, spm_sha=S, matlab_release=R)
+
+    # Fix _version.py
+    fix_version(spm_version=V, spm_sha=S, matlab_release=R)
+
+
+def fix_pyproject(odir=".", **versions):
+    # Fix pyproject.toml
+    
+    import toml
+
+    fname = os.path.join(odir, "pyproject.toml")
+    
+    V = versions.get("spm_version")
+    S = versions.get("spm_sha")
+    R = versions.get("matlab_release")
+    
+    python_versions = list(SUPPORTED_PYTHON_VERSIONS[R])
+    
+    pyproject = toml.load(fname)
+    project = pyproject.get("project")
+    if p.main_package:
+        project['name'] = "spm-runtime"
+    else:
+        project['name'] = f"spm-runtime-{R}"
+    if V:
+        project['version'] = V
+    project['requires-python'] = _requires_python(python_versions)
+    project['classifiers'] = [
+        classifier for classifier in project['classifiers']
+        if not classifier.startswith("Programming Language :: Python")
+    ]
+    project['classifiers'] += [
+        "Programming Language :: Python :: " + python_version
+        for python_version in python_versions
+    ]
+    with open(fname, "w") as f:
+        toml.dump(pyproject, f)
+
+
+def fix_version(odir=".", **versions):
+    # Fix _version.py
+
+    fname = os.path.join(odir, "spm_runtime", "_version.py")
+
+    V = versions.get("spm_version")
+    S = versions.get("spm_sha")
+    R = versions.get("matlab_release")
+    
+    with open(fname, "rt") as f:
+        input_metadata = {}
+        for line in f:
+            if not line.strip():
+                continue
+            key, val = line.split("=")
+            key, val = key.strip(), val.strip()
+            input_metadata[key] = val
+
+    with open(fname, "wt") as f:
+        V = V or input_metadata.get("__version__", "0.0.0+unknown")
+        S = S or input_metadata.get("__spm_sha__", None)
+        R = R or input_metadata.get("__matlab_release__", None)
+        lines = [f'__version__ = "{V}"']
+        if R:
+            lines += [f'__matlab_release__ = "{R}"']
+        if S:
+            lines += [f'__spm_sha__ = "{S}"']
+        f.write("\n".join(lines) + "\n")
 
 
 def _requires_python(python_versions):
@@ -38,57 +114,6 @@ def _requires_python(python_versions):
         python_versions += f",<{maj}.{min+1}"
 
     return python_versions
-
-
-def _main():
-    p = _make_parser().parse_args()
-    R = p.matlab_version
-    V = p.spm_version
-    S = p.spm_sha
-
-    python_versions = list(SUPPORTED_PYTHON_VERSIONS[R])
-
-    # Fix pyproject.toml
-    pyproject = toml.load("pyproject.toml")
-    project = pyproject.get("project")
-    if p.main_package:
-        project['name'] = "spm-runtime"
-    else:
-        project['name'] = f"spm-runtime-{R}"
-    if V:
-        project['version'] = V
-    project['requires-python'] = _requires_python(python_versions)
-    project['classifiers'] = [
-        classifier for classifier in project['classifiers']
-        if not classifier.startswith("Programming Language :: Python")
-    ]
-    project['classifiers'] += [
-        "Programming Language :: Python :: " + python_version
-        for python_version in python_versions
-    ]
-    with open("pyproject.toml", "w") as f:
-        toml.dump(pyproject, f)
-
-    # Fix _version.py
-    with open("spm_runtime/_version.py", "rt") as f:
-        input_metadata = {}
-        for line in f:
-            if not line.strip():
-                continue
-            key, val = line.split("=")
-            key, val = key.strip(), val.strip()
-            input_metadata[key] = val
-
-    with open("spm_runtime/_version.py", "wt") as f:
-        V = V or input_metadata["__version__"]
-        S = S or input_metadata.get("__spm_sha__", None)
-        lines = [
-            f'__version__ = "{V}"',
-            f'__matlab_release__ = "{R}"',
-        ]
-        if S:
-            lines += [f'__spm_sha__ = "{S}"']
-        f.write("\n".join(lines) + "\n")
 
 
 if __name__ == "__main__":
