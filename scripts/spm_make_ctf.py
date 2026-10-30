@@ -111,6 +111,7 @@ def compile(spm_version=None, matlab_release=None, odir="."):
             f"Cannot compile CTF for MATLAB {matlab_release} with"
             f"MATLAB {current_release} (which is the version on the path)"
         )
+    versions["matlab_release"] = matlab_release
 
     with tempfile.TemporaryDirectory() as tmpdir:
 
@@ -174,13 +175,13 @@ def compile(spm_version=None, matlab_release=None, odir="."):
         )
 
     os.chdir(cwd)
-    return os.path.join(odir, ctf_name)
+    return os.path.join(odir, ctf_name), versions
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--spm-version", default=None)
-    parser.add_argument("-r", "--matlab-runtime", default="R2024b")
+    parser.add_argument("-r", "--matlab-runtime", default=None)
     parser.add_argument("-o", "--output", default=".")
     p = parser.parse_args()
     compile(p.spm_version, p.matlab_runtime, p.output)
