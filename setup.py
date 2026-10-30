@@ -30,12 +30,14 @@ class BuildCTF(Command):
             sys.path.insert(0, ROOT)
             sys.path.insert(0, os.path.join(ROOT, 'scripts'))
             from spm_make_ctf import compile
+            from spm_make_package import fix_version
             try:
                 from spm_runtime._version import __spm_sha__ as spm_version
             except Exception:
                 spm_version = None
-            ctf = compile(spm_version)
+            ctf, versions = compile(spm_version)
             shutil.move(ctf, os.path.join(self.build_lib, CTF_PATH))
+            fix_version(self.build_lib, **versions)
 
     def get_output_mapping(self):
         """Return dict mapping output file paths to input file paths."""
