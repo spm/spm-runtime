@@ -1,3 +1,3 @@
-__version__ = "25.01.02.post4"
+__version__ = "26.10.01"
 __matlab_release__ = "R2026b"
-__spm_sha__ = "76167510b7190027995325d609a2365d9a7b6bc2"
+__spm_sha__ = "489515f8cac23ad02487b0473d97ac36c258b6d0"
