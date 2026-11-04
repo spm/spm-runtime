@@ -16,15 +16,16 @@ def _main():
     R = p.matlab_version
     V = p.spm_version
     S = p.spm_sha
+    M = p.main_package
 
     # Fix pyproject.toml
-    fix_pyproject(spm_version=V, spm_sha=S, matlab_release=R)
+    fix_pyproject(main_package=M, spm_version=V, spm_sha=S, matlab_release=R)
 
     # Fix _version.py
     fix_version(spm_version=V, spm_sha=S, matlab_release=R)
 
 
-def fix_pyproject(odir=".", **versions):
+def fix_pyproject(odir=".", main_package=True, **versions):
     # Fix pyproject.toml
     
     import toml
@@ -39,7 +40,7 @@ def fix_pyproject(odir=".", **versions):
     
     pyproject = toml.load(fname)
     project = pyproject.get("project")
-    if p.main_package:
+    if main_package:
         project['name'] = "spm-runtime"
     else:
         project['name'] = f"spm-runtime-{R}"
